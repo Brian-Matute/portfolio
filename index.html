@@ -149,22 +149,26 @@ nav.scrolled .icon-btn{border-color:var(--line);color:var(--text);background:tra
 .hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,10,24,.94) 0%,rgba(4,10,24,.74) 30%,rgba(4,10,24,.2) 58%,rgba(4,10,24,.05) 100%),linear-gradient(0deg,var(--bg) 0%,rgba(4,10,24,0) 28%)}
 .hud{position:absolute;top:88px;display:flex;gap:12px;align-items:center;font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.2em;opacity:0;transition:opacity .8s 1.6s}
 .hero.go .hud{opacity:1}
-.hud-l{left:max(20px,calc((100vw - 1160px) / 2))}
+.hud-l{left:clamp(20px,4vw,72px)}
 .hud-r{right:max(20px,calc((100vw - 1160px) / 2));color:#BFE9FF}
 .live-bug{display:inline-flex;align-items:center;gap:7px;background:#E11D48;color:#fff;padding:5px 10px;border-radius:4px;box-shadow:0 0 18px rgba(225,29,72,.6)}
 .live-bug i{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1s steps(1) infinite}
 .clock{background:rgba(4,10,24,.6);border:1px solid rgba(46,197,255,.35);padding:5px 10px;border-radius:4px;font-variant-numeric:tabular-nums}
 .hud-r .rec i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#E11D48;margin-right:6px;animation:blink 1s steps(1) infinite}
 .hud-r .tc{font-variant-numeric:tabular-nums;background:rgba(4,10,24,.6);padding:5px 10px;border-radius:4px;border:1px solid rgba(255,255,255,.15)}
+/* the hero text hugs the left edge so it covers less of the photos */
+.hero .wrap.hero-in{max-width:none;margin:0;padding-left:clamp(20px,4vw,72px);padding-right:20px}
 .hero-in{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;padding-top:60px;padding-bottom:150px}
+.hero-in > *{max-width:min(640px,46vw)}
+.hero-in > .hero-name{max-width:none}
 .eyebrow{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--neon);display:flex;align-items:center;gap:12px}
 .eyebrow::before{content:"";width:40px;height:2px;background:var(--neon);box-shadow:0 0 10px var(--neon)}
-.hero-name{font-family:var(--display);font-weight:700;font-size:clamp(64px,12vw,170px);line-height:.86;letter-spacing:-.01em;margin:18px 0 6px;text-transform:uppercase}
+.hero-name{font-family:var(--display);font-weight:700;font-size:clamp(64px,10vw,150px);line-height:.86;letter-spacing:-.01em;margin:18px 0 6px;text-transform:uppercase}
 .hero-name .line{display:block;overflow:hidden;padding-bottom:.04em}
 .hero-name .ch{display:inline-block;transform:translateY(105%) rotate(8deg);transition:transform 1s var(--ease)}
 .hero.go .hero-name .ch{transform:none}
 .hero-name .accent .ch{background:linear-gradient(100deg,#E6F1FF 10%,var(--neon) 42%,#BFE9FF 52%,var(--electric) 70%,#E6F1FF 92%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sheen 3.5s 1.6s ease-in-out 2 both}
-.hero-sig{width:min(300px,52vw);margin:-4px 0 10px clamp(120px,30vw,430px)}
+.hero-sig{width:min(260px,52vw);margin:-4px 0 10px clamp(110px,24vw,360px)}
 .role{font-size:clamp(20px,2.4vw,28px);color:#B4C6E4;font-weight:500;min-height:1.5em}
 .role b{color:#fff;font-family:var(--display);letter-spacing:.04em}
 .role b::after{content:"_";color:var(--neon);animation:blink 1s steps(1) infinite}
@@ -184,7 +188,7 @@ nav.scrolled .icon-btn{border-color:var(--line);color:var(--text);background:tra
 .btn-line{background:var(--card);color:var(--text);border:1px solid var(--line)}
 .btn-line:hover{border-color:var(--accent);color:var(--accent)}
 .magnetic{transition:translate .35s var(--ease)}
-.lower-third{position:absolute;left:max(20px,calc((100vw - 1160px) / 2));bottom:78px;display:flex;flex-direction:column;align-items:flex-start;z-index:4}
+.lower-third{position:absolute;left:clamp(20px,4vw,72px);bottom:78px;display:flex;flex-direction:column;align-items:flex-start;z-index:4}
 .lower-third > *{transform:translateX(-120%);transition:transform .8s var(--ease)}
 .hero.go .lower-third > *{transform:none}
 .lt-name{background:#E6F1FF;color:#040A18;font-family:var(--display);font-weight:700;font-size:18px;padding:7px 16px;letter-spacing:.05em;border-left:6px solid var(--neon);transition-delay:1.5s!important}
@@ -209,6 +213,7 @@ nav.scrolled .icon-btn{border-color:var(--line);color:var(--text);background:tra
   .hero-in{height:auto;min-height:100svh;justify-content:flex-end;padding-top:44vh;padding-bottom:150px}
   .hud{top:80px}.hud-r .tc{display:none}
   .hero-name{margin-top:10px}
+  .hero-in > *{max-width:none}
   .hero-sig{width:42vw;margin:-14px 0 2px auto}
   .hero .lead{font-size:16px;margin:10px 0 22px}
   .hero .btn{padding:12px 18px;font-size:14px}
@@ -306,30 +311,62 @@ section{padding:110px 0;position:relative}
 }
 @media (max-width:480px){.facts{grid-template-columns:1fr}}
 
-/* ============ CAREER (sideways scroll on desktop) ============ */
-#timeline{padding:0}
-.hs-sticky{position:sticky;top:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;padding:100px 0 60px}
-.hs-track{display:flex;gap:26px;padding:10px max(20px,calc((100vw - 1160px) / 2));will-change:transform;width:max-content}
-.hcard{flex:none;width:360px;min-height:330px;padding:28px;position:relative;overflow:hidden;display:flex;flex-direction:column;border-top:3px solid var(--c)}
-.hcard .yr{font-family:var(--display);font-weight:700;font-size:64px;line-height:.9;color:transparent;-webkit-text-stroke:1.5px color-mix(in srgb,var(--c) 75%,var(--text));margin-bottom:auto;padding-bottom:30px}
-.hcard .idx{position:absolute;top:22px;right:24px;font-family:var(--display);font-size:13px;letter-spacing:.2em;color:var(--muted)}
-.hcard .when{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 75%,var(--text))}
-.hcard h3{font-size:24px;line-height:1.2;margin:6px 0 8px}
-.hcard p{color:var(--muted);font-size:16px}
-.hcard::before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:var(--c);filter:blur(70px);opacity:.14;top:-80px;right:-80px}
-.hcard.next{border:2px dashed color-mix(in srgb,var(--c) 60%,var(--line));background:color-mix(in srgb,var(--c) 8%,var(--card))}
-.hcard.next .btn{margin-top:16px;align-self:flex-start}
-.hs-progress{margin:34px max(20px,calc((100vw - 1160px) / 2)) 0;height:3px;background:var(--line);border-radius:3px;position:relative}
-.hs-progress i{position:absolute;left:0;top:0;bottom:0;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--gold),var(--neon),var(--pink),var(--mint),var(--purple));border-radius:3px}
-.hs-progress i{box-shadow:0 0 12px var(--neon)}
-.hs-hint{font-family:var(--display);font-size:12px;letter-spacing:.24em;color:var(--muted);text-transform:uppercase}
-@media (max-width:900px){
-  #timeline{padding:100px 0}
-  .hs-sticky{position:static;min-height:0;padding:0}
-  .hs-track{flex-direction:column;transform:none!important;width:auto}
-  .hcard{width:auto;min-height:0}
-  .hcard .yr{font-size:48px;padding-bottom:16px}
-  .hs-progress,.hs-hint{display:none}
+/* ============ MY TIMELINE ============ */
+/* a center line that fills in as you scroll; each moment lights up (icon animates, card slides in) as you reach it */
+.tl{position:relative;max-width:1100px;margin:50px auto 0;padding:10px 0 20px}
+.tl-line{position:absolute;left:50%;top:0;bottom:0;width:4px;margin-left:-2px;border-radius:4px;background:var(--line);overflow:hidden}
+.tl-line i{position:absolute;inset:0;background:linear-gradient(180deg,var(--gold),var(--neon) 22%,var(--pink) 40%,var(--mint) 58%,var(--electric) 76%,var(--purple));transform:scaleY(0);transform-origin:top}
+.tl-head{position:absolute;left:50%;top:0;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#fff;box-shadow:0 0 18px var(--neon),0 0 5px #fff;z-index:3;will-change:transform}
+.ev{position:relative;display:grid;grid-template-columns:1fr 120px 1fr;align-items:center;min-height:190px;margin-bottom:30px}
+.ev .tl-card{grid-column:1;grid-row:1;padding:24px 26px;position:relative;overflow:hidden;border-top:3px solid var(--c);opacity:0;transform:translateX(-60px);transition:opacity .8s var(--ease),transform .9s var(--ease),box-shadow .3s,border-color .3s}
+.ev .tl-date{grid-column:3;grid-row:1;display:flex;flex-direction:column;align-items:flex-start;opacity:0;transform:translateX(40px);transition:opacity .8s .15s var(--ease),transform .9s .15s var(--ease)}
+.ev.flip .tl-card{grid-column:3;transform:translateX(60px)}
+.ev.flip .tl-date{grid-column:1;align-items:flex-end;text-align:right;transform:translateX(-40px)}
+.ev.lit .tl-card,.ev.lit .tl-date{opacity:1;transform:none}
+.ev .tl-card:hover{border-color:var(--c);box-shadow:0 0 30px color-mix(in srgb,var(--c) 28%,transparent)}
+.tl-card::before{content:"";position:absolute;width:200px;height:200px;border-radius:50%;background:var(--c);filter:blur(70px);opacity:.12;top:-90px;right:-70px}
+.tl-card .when{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 75%,var(--text))}
+.tl-card h3{font-family:var(--display);font-size:24px;line-height:1.15;text-transform:uppercase;margin:6px 0 8px}
+.tl-card p{color:var(--muted);font-size:16px}
+.tl-card .btn{margin-top:14px}
+.tl-date .yr{font-family:var(--display);font-weight:700;font-size:clamp(54px,6.5vw,92px);line-height:.9;color:transparent;-webkit-text-stroke:1.5px color-mix(in srgb,var(--c) 75%,var(--text));transition:color 1s .4s}
+.ev.lit .tl-date .yr{color:color-mix(in srgb,var(--c) 22%,transparent)}
+.tl-date .age{margin-top:10px;font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;padding:5px 12px;border-radius:999px;border:1px solid color-mix(in srgb,var(--c) 50%,var(--line));color:color-mix(in srgb,var(--c) 75%,var(--text));background:color-mix(in srgb,var(--c) 8%,transparent)}
+.node{grid-column:2;grid-row:1;justify-self:center;position:relative;width:86px;height:86px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid color-mix(in srgb,var(--c) 40%,var(--line));color:color-mix(in srgb,var(--c) 70%,var(--text));z-index:2;transform:scale(.55);opacity:.55;transition:transform .8s cubic-bezier(.3,1.6,.5,1),opacity .5s,background .6s,box-shadow .6s,color .6s,border-color .6s}
+.ev.lit .node{transform:scale(1);opacity:1;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--c) 40%,#0A1733),#040A18 75%);border-color:var(--c);color:#fff;box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 14%,transparent),0 0 34px color-mix(in srgb,var(--c) 50%,transparent)}
+.node::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--c);opacity:0;pointer-events:none}
+.ev.lit .node::after{animation:ping 2.2s .3s ease-out 2}
+.node svg{width:46px;height:46px;overflow:visible;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.node svg *{transform-box:fill-box;transform-origin:center}
+.bits{position:absolute;left:50%;top:50%;pointer-events:none}
+.bits i{position:absolute;width:7px;height:12px;margin:-6px 0 0 -3px;border-radius:2px;background:var(--b);opacity:0}
+.ev.lit .bits i{animation:burst 1.2s .35s cubic-bezier(.2,.8,.2,1) forwards}
+/* icon animations only run once a moment is lit (and pause off screen) */
+.ev:not(.lit) .node svg *{animation:none!important}
+.i-star .core{animation:tlSpin 4s ease-in-out infinite}
+.i-star .tw{animation:tlTw 1.8s ease-in-out infinite}.i-star .t2{animation-delay:.6s}.i-star .t3{animation-delay:1.2s}
+.i-mic .wave{animation:tlWave 1.6s ease-out infinite}.i-mic .w2{animation-delay:.4s}
+.i-school .flag{transform-origin:left center;animation:tlFlag .9s ease-in-out infinite alternate}
+.i-cap .capg{animation:tlToss 2.6s ease-in-out infinite}
+.i-book .page{transform-origin:left center;animation:tlFlip 3s ease-in-out infinite}
+.i-shield .scan{animation:tlScan 2s ease-in-out infinite}
+.i-tv .ant{transform-origin:center bottom;animation:tlWiggle 1.4s ease-in-out infinite alternate}
+.i-tv .rec{animation:blink 1s steps(1) infinite}
+.i-layers .l1{animation:tlFanA 2.8s ease-in-out infinite}.i-layers .l3{animation:tlFanB 2.8s ease-in-out infinite}
+.i-clap .top{transform-origin:left bottom;animation:tlClap 1.8s ease-in-out infinite}
+.i-trophy .cup{animation:tlBob 2.4s ease-in-out infinite}
+.i-trophy .cf{animation:tlConf 2.2s linear infinite}.i-trophy .c2{animation-delay:.7s}.i-trophy .c3{animation-delay:1.4s}
+.i-rocket .body{animation:tlHover 1.6s ease-in-out infinite alternate}
+.i-rocket .flame{transform-origin:center top;animation:tlFlame .22s ease-in-out infinite alternate}
+@media (max-width:760px){
+  .tl-line,.tl-head{left:32px}
+  .ev{grid-template-columns:64px 1fr;min-height:0;column-gap:14px;margin-bottom:34px;align-items:start}
+  .node,.ev.flip .node{grid-column:1;grid-row:1 / 3;width:60px;height:60px;justify-self:start;margin-left:2px}
+  .node svg{width:32px;height:32px}
+  .ev .tl-date,.ev.flip .tl-date{grid-column:2;grid-row:1;align-items:flex-start;text-align:left;flex-direction:row;align-items:center;gap:12px;transform:translateY(20px)}
+  .ev .tl-card,.ev.flip .tl-card{grid-column:2;grid-row:2;margin-top:10px;transform:translateY(30px)}
+  .tl-date .yr{font-size:44px}
+  .tl-date .age{margin-top:0}
 }
 
 /* ============ REEL ============ */
@@ -574,6 +611,23 @@ footer b{color:#E6F1FF}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
 @keyframes fill{to{transform:scaleX(1)}}
 @keyframes kenburns{from{transform:scale(1.04) translate3d(0,0,0)}to{transform:scale(1.14) translate3d(-2%,-1.5%,0)}}
+@keyframes ping{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+@keyframes burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0)}100%{opacity:0;transform:rotate(var(--a)) translateY(-78px) rotate(220deg)}}
+@keyframes tlSpin{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(14deg) scale(1.14)}}
+@keyframes tlTw{0%,100%{opacity:.15;transform:scale(.5)}50%{opacity:1;transform:scale(1.4)}}
+@keyframes tlWave{0%{opacity:0;transform:scale(.8)}40%{opacity:1}100%{opacity:0;transform:scale(1.15)}}
+@keyframes tlFlag{from{transform:skewY(0) scaleX(1)}to{transform:skewY(-10deg) scaleX(.82)}}
+@keyframes tlToss{0%,55%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-8px) rotate(-12deg)}}
+@keyframes tlFlip{0%,25%{transform:scaleX(1)}55%,80%{transform:scaleX(-1)}100%{transform:scaleX(1)}}
+@keyframes tlScan{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(24px);opacity:0}}
+@keyframes tlWiggle{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+@keyframes tlFanA{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg) translate(3px,2px)}}
+@keyframes tlFanB{0%,100%{transform:rotate(0)}50%{transform:rotate(-9deg) translate(-3px,-2px)}}
+@keyframes tlClap{0%,62%,100%{transform:rotate(0)}74%{transform:rotate(-22deg)}86%{transform:rotate(0)}}
+@keyframes tlBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes tlConf{0%{transform:translateY(-6px) rotate(0);opacity:0}15%{opacity:1}100%{transform:translateY(22px) rotate(240deg);opacity:0}}
+@keyframes tlHover{from{transform:translateY(2px)}to{transform:translateY(-4px)}}
+@keyframes tlFlame{from{transform:scaleY(.65);opacity:.75}to{transform:scaleY(1.25);opacity:1}}
 @keyframes pageIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes blink{50%{opacity:0}}
 @keyframes sheen{from{background-position:100% 0}to{background-position:-200% 0}}
@@ -623,7 +677,6 @@ footer b{color:#E6F1FF}
       <li><a href="#/" data-r="home">Home</a></li>
       <li><a href="#/career" data-r="career">Career</a></li>
       <li><a href="#/reel" data-r="reel">Reel</a></li>
-      <li><a href="#/skills" data-r="skills">Skills</a></li>
       <li><a href="#/gallery" data-r="gallery">Gallery</a></li>
       <li><a href="#/resume" data-r="resume">Resume</a></li>
       <li><a href="#/contact" data-r="contact">Contact</a></li>
@@ -651,7 +704,6 @@ footer b{color:#E6F1FF}
   <div class="hud hud-l"><span class="live-bug"><i></i>LIVE</span><span class="clock" id="clock">MIAMI --:--:--</span></div>
   <div class="hud hud-r"><span class="rec"><i></i>REC</span><span class="tc" id="tc">00:00:00:00</span></div>
   <div class="wrap hero-in">
-    <p class="eyebrow h-anim" style="transition-delay:.2s">Bilingual · English &amp; Spanish</p>
     <h1 class="hero-name" id="heroName"><span class="line">Brian</span><span class="line accent">Matute</span></h1>
     <div class="hero-sig" id="heroSig"></div>
     <div class="role h-anim" style="transition-delay:1.1s">I'm a <b id="roleText">Multimedia Journalist</b></div>
@@ -696,62 +748,10 @@ footer b{color:#E6F1FF}
   </div>
 </section>
 
-<!-- ============ EXPLORE: links to every area of the site ============ -->
-<section id="explore">
-  <div class="wrap">
-    <span class="kicker c-electric reveal"><span class="num">02</span> Explore</span>
-    <h2 class="sec-title split reveal">Take a <em class="serif">look around</em></h2>
-    <div class="portals" id="portals"></div>
-  </div>
-</section>
-
-<!-- ============ MY TIMELINE (sideways scroll on desktop) ============ -->
-<section id="timeline">
-  <div class="hs-sticky" id="hsSticky">
-    <div class="wrap">
-      <span class="kicker c-gold reveal"><span class="num">03</span> My timeline</span>
-      <h2 class="sec-title split reveal">My <em class="serif">timeline</em></h2>
-      <p class="hs-hint reveal">Keep scrolling →</p>
-    </div>
-    <div class="hs-track" id="careerPath"></div>
-    <div class="hs-progress"><i id="hsBar"></i></div>
-  </div>
-</section>
-</div>
-
-<!-- ================= REEL PAGE ================= -->
-<div class="page" data-page="reel" hidden>
-<section id="reel">
-  <div class="wrap">
-    <span class="kicker c-pink reveal"><span class="num">03</span> On camera</span>
-    <h2 class="sec-title split reveal">Reel &amp; <em class="serif">stories</em></h2>
-    <p class="sec-sub reveal">My demo reel and some of my packages, live hits and segments. Click any card to watch.</p>
-    <div class="monitor reveal zoom"><div class="screen" id="reelFeature"></div></div>
-    <div class="video-grid" id="videoGrid"></div>
-  </div>
-</section>
-
-</div>
-
-<!-- ================= CAREER PAGE ================= -->
-<div class="page" data-page="career" hidden>
-<section id="experience">
-  <div class="wrap">
-    <span class="kicker c-electric reveal"><span class="num">04</span> Experience</span>
-    <h2 class="sec-title split reveal">The <em class="serif">rundown</em></h2>
-    <p class="sec-sub reveal">Every role, in order. Click one to read more.</p>
-    <button class="btn btn-line expand-all reveal" id="expandAll"><span>Expand all</span></button>
-    <div id="jobsWrap"></div>
-  </div>
-</section>
-
-</div>
-
-<!-- ================= SKILLS PAGE ================= -->
-<div class="page" data-page="skills" hidden>
+<!-- ============ SKILLS ============ -->
 <section id="skills">
   <div class="wrap">
-    <span class="kicker c-mint reveal"><span class="num">05</span> Skills</span>
+    <span class="kicker c-mint reveal"><span class="num">02</span> Skills</span>
     <h2 class="sec-title split reveal">What I <em class="serif">bring</em></h2>
     <p class="sec-sub reveal">Click a skill area to see more.</p>
     <div class="skills">
@@ -804,6 +804,52 @@ footer b{color:#E6F1FF}
         </div></div></div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ EXPLORE: links to every area of the site ============ -->
+<section id="explore">
+  <div class="wrap">
+    <span class="kicker c-electric reveal"><span class="num">03</span> Explore</span>
+    <h2 class="sec-title split reveal">Take a <em class="serif">look around</em></h2>
+    <div class="portals" id="portals"></div>
+  </div>
+</section>
+
+<!-- ============ MY TIMELINE ============ -->
+<section id="timeline">
+  <div class="wrap">
+    <span class="kicker c-gold reveal"><span class="num">04</span> My timeline</span>
+    <h2 class="sec-title split reveal">My <em class="serif">timeline</em></h2>
+    <p class="sec-sub reveal">From day one to right now. Keep scrolling.</p>
+    <div class="tl" id="tl"><div class="tl-line"><i id="tlFill"></i></div><span class="tl-head" id="tlHead"></span><div id="tlEvents"></div></div>
+  </div>
+</section>
+</div>
+
+<!-- ================= REEL PAGE ================= -->
+<div class="page" data-page="reel" hidden>
+<section id="reel">
+  <div class="wrap">
+    <span class="kicker c-pink reveal"><span class="num">03</span> On camera</span>
+    <h2 class="sec-title split reveal">Reel &amp; <em class="serif">stories</em></h2>
+    <p class="sec-sub reveal">My demo reel and some of my packages, live hits and segments. Click any card to watch.</p>
+    <div class="monitor reveal zoom"><div class="screen" id="reelFeature"></div></div>
+    <div class="video-grid" id="videoGrid"></div>
+  </div>
+</section>
+
+</div>
+
+<!-- ================= CAREER PAGE ================= -->
+<div class="page" data-page="career" hidden>
+<section id="experience">
+  <div class="wrap">
+    <span class="kicker c-electric reveal"><span class="num">04</span> Experience</span>
+    <h2 class="sec-title split reveal">The <em class="serif">rundown</em></h2>
+    <p class="sec-sub reveal">Every role, in order. Click one to read more.</p>
+    <button class="btn btn-line expand-all reveal" id="expandAll"><span>Expand all</span></button>
+    <div id="jobsWrap"></div>
   </div>
 </section>
 
@@ -905,7 +951,7 @@ footer b{color:#E6F1FF}
 <footer>
   <div class="wrap">
     <div class="foot-lockup"><div id="footSig"></div><div class="rule"></div><div class="name">BRIAN MATUTE</div><div class="tag">Multimedia Journalist</div></div>
-    <div class="foot-links"><a href="#/">Home</a><a href="#/career">Career</a><a href="#/reel">Reel</a><a href="#/skills">Skills</a><a href="#/gallery">Gallery</a><a href="#/resume">Resume</a><a href="#/contact">Contact</a></div>
+    <div class="foot-links"><a href="#/">Home</a><a href="#/career">Career</a><a href="#/reel">Reel</a><a href="#/gallery">Gallery</a><a href="#/resume">Resume</a><a href="#/contact">Contact</a></div>
     © <span id="yr"></span> <b>Brian Matute</b> · Miami, FL
   </div>
 </footer>
@@ -954,15 +1000,19 @@ const DEFAULTS = {
     "Pulse reporter: Dish It Out",
     "Dean's List 5 semesters"
   ],
-  career: [
-    { when: "2019 – 2023", title: "Coral Gables Senior High", text: "Graduated with the Superintendent's Diploma of Distinction.", color: "gold" },
-    { when: "Aug 2023", title: "University of Miami", text: "Started my B.S. in Communication, majoring in Broadcast Journalism.", color: "neon" },
-    { when: "Jun 2024", title: "Security Specialist, Target", text: "Handled security and incident response while in school, until July 2025.", color: "purple" },
-    { when: "Aug 2024", title: "Joined UMTV on air", text: "Anchor, reporter, writer and video editor for NewsBreak.", color: "pink" },
-    { when: "Jan 2025", title: "Behind the camera, too", text: "Became NewsBreak's Associate Producer, a reporter for NewsVision, and an audio operator for UMTV's live broadcasts.", color: "mint" },
-    { when: "Jan 2026", title: "Executive Producer", text: "Took over NewsBreak as Executive Producer and joined Pulse as a reporter.", color: "electric" },
-    { when: "May 2026", title: "Graduated + Andrew Barton Award", text: "Graduated from UM with the Andrew Barton Award for Outstanding Commitment to UMTV.", color: "gold" },
-    { when: "Up next", title: "Your newsroom?", text: "Looking for my next role as a reporter, producer or multimedia journalist.", color: "neon" }
+  // My Timeline. date = when it started (used for the "age" badge). icon: star, mic, school, cap, book, shield, tv, layers, clap, trophy, rocket
+  timeline: [
+    { date: "2005-06-15", when: "June 15, 2005",  title: "Born",                         icon: "star",   color: "gold",     text: "Where it all started." },
+    { date: "2013-09-01", when: "2013 – 2015",     title: "WKPE morning announcements",   icon: "mic",    color: "pink",     text: "Joined my elementary school's morning announcements program, WKPE." },
+    { date: "2019-06-01", when: "June 2019",       title: "Started high school",          icon: "school", color: "mint",     text: "Began at Coral Gables Senior High." },
+    { date: "2023-05-01", when: "May 2023",        title: "Graduated high school",        icon: "cap",    color: "gold",     text: "Graduated with the Superintendent's Diploma of Distinction.", burst: "yes" },
+    { date: "2023-08-01", when: "August 2023",     title: "Started at the University of Miami", icon: "book", color: "neon", text: "Began my B.S. in Communication, majoring in Broadcast Journalism." },
+    { date: "2024-06-01", when: "June 2024",       title: "Started at Target",            icon: "shield", color: "purple",   text: "Security Specialist in Coral Gables, through July 2025." },
+    { date: "2024-08-01", when: "August 2024",     title: "Joined UMTV on air",           icon: "tv",     color: "pink",     text: "Anchor, reporter, writer and video editor for NewsBreak." },
+    { date: "2025-01-01", when: "January 2025",    title: "Multiple new roles at UMTV",   icon: "layers", color: "mint",     text: "Became NewsBreak's Associate Producer, a reporter for NewsVision, and an audio operator for UMTV's live broadcasts." },
+    { date: "2026-01-01", when: "January 2026",    title: "Executive Producer",           icon: "clap",   color: "electric", text: "Took over NewsBreak as Executive Producer and joined Pulse as a reporter." },
+    { date: "2026-05-01", when: "May 2026",        title: "Graduated from UM",            icon: "trophy", color: "gold",     text: "Earned my B.S. in Broadcast Journalism and received the Andrew Barton Award for Outstanding Commitment to UMTV.", burst: "yes" },
+    { date: "",           when: "Up next",         title: "Your newsroom?",               icon: "rocket", color: "neon",     text: "Looking for my next role as a reporter, producer or multimedia journalist." }
   ],
   jobs: [
     { org: "University of Miami Television (UMTV)", orgDetails: "Miami, FL · Aug 2024 – May 2026", show: "NewsBreak", title: "Executive Producer", dates: "Jan 2026 – May 2026", color: "neon",
@@ -1238,7 +1288,7 @@ $$(".split").forEach(splitWords);
 // everything scroll-linked runs once per frame, and only while the page is actually scrolling
 let lastY = scrollY, ticking = false, docH = 1;
 const nav = $("#nav"), bar = $("#progress"), toTop = $("#toTop");
-function measure(){ docH = Math.max(1, document.documentElement.scrollHeight - innerHeight); sizeCareer(); }
+function measure(){ docH = Math.max(1, document.documentElement.scrollHeight - innerHeight); }
 function onScroll(){ if (!ticking) { ticking = true; requestAnimationFrame(update); } }
 function update(){
   ticking = false;
@@ -1255,10 +1305,14 @@ function update(){
     if (r.bottom < -100 || r.top > innerHeight + 100) return;
     el.style.translate = "0 " + ((r.top + r.height / 2 - innerHeight / 2) * +el.dataset.speed).toFixed(1) + "px";
   });
-  if (hs.on) {
-    const p = Math.min(1, Math.max(0, (y - hs.top) / hs.run));
-    hs.track.style.transform = "translate3d(" + (-p * hs.extra).toFixed(1) + "px,0,0)";
-    hs.bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+  // timeline: the line fills (and the glowing dot rides it) as you scroll through
+  if (page === "home") {
+    const r = tl.box.getBoundingClientRect();
+    if (r.top < innerHeight && r.bottom > 0) {
+      const p = Math.min(1, Math.max(0, (innerHeight * 0.65 - r.top) / r.height));
+      tl.fill.style.transform = "scaleY(" + p.toFixed(4) + ")";
+      tl.head.style.transform = "translate3d(0," + (p * r.height).toFixed(1) + "px,0)";
+    }
   }
 }
 addEventListener("scroll", onScroll, { passive: true });
@@ -1272,8 +1326,6 @@ const PAGES = [
     blurb: "Every role at UMTV and beyond, from anchor desk to executive producer.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg>' },
   { r: "reel",    title: "Reel",            kicker: "On camera",         sub: "My demo reel and some of my packages, live hits and segments.",          photo: "hero.jpg", color: "pink",
     blurb: "My demo reel, packages, live hits and segments.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg>' },
-  { r: "skills",  title: "Skills",          kicker: "What I bring",      sub: "On-air, producing, writing, and editing and tech. Click an area to see more.", photo: "bio.jpg", color: "mint",
-    blurb: "On-air, producing, writing, editing and tech.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></svg>' },
   { r: "gallery", title: "Gallery",         kicker: "Behind the scenes", sub: "In the studio, in the field and behind the camera.",                    photo: "hero.jpg", color: "purple",
     blurb: "Photos from the studio, the field and behind the camera.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' },
   { r: "resume",  title: "Resume",          kicker: "On paper",          sub: "Read it here, open it full screen, or download a copy.",                photo: "bio.jpg",  color: "gold",
@@ -1327,15 +1379,7 @@ addEventListener("hashchange", route);
 
 // the scrolling word band loops with CSS; it just needs its words twice
 $$(".marquee .track").forEach(t => t.innerHTML += t.innerHTML);
-// career: on desktop, scrolling down moves the cards sideways
-const hs = { sec: $("#timeline"), track: $("#careerPath"), bar: $("#hsBar"), on: false, extra: 0, top: 0, run: 1 };
-function sizeCareer(){
-  hs.on = innerWidth > 900 && !REDUCED;
-  if (!hs.on) { hs.sec.style.height = ""; hs.track.style.transform = ""; return; }
-  hs.extra = Math.max(0, hs.track.scrollWidth - innerWidth);
-  hs.sec.style.height = (innerHeight + hs.extra) + "px";
-  hs.top = hs.sec.offsetTop; hs.run = Math.max(1, hs.sec.offsetHeight - innerHeight);
-}
+const tl = { box: $("#tl"), fill: $("#tlFill"), head: $("#tlHead") };
 const parallax = $$("[data-speed]");
 addEventListener("resize", () => { measure(); onScroll(); });
 // pause looping animations (and the slideshow/clock) while they're off screen
@@ -1344,7 +1388,7 @@ const pauser = new IntersectionObserver(entries => entries.forEach(e => {
   if (e.target.dataset.watch) e.isIntersecting ? visible.add(e.target.dataset.watch) : visible.delete(e.target.dataset.watch);
 }));
 $(".hero").dataset.watch = "hero"; $("#reel").dataset.watch = "reel";
-[".hero", "#reel", ".strip", ".ring", "footer", ".page-hero"].forEach(s => $$(s).forEach(el => pauser.observe(el)));
+[".hero", "#reel", ".strip", ".ring", "footer", ".page-hero", "#timeline"].forEach(s => $$(s).forEach(el => pauser.observe(el)));
 
 // ---------- reveal on scroll + counters + signatures ----------
 const revealer = new IntersectionObserver(entries => {
@@ -1442,17 +1486,48 @@ function renderTicker(){
   $("#tickerTrack").innerHTML = t + t;
 }
 
-// ---------- career cards ----------
-function renderCareer(){
-  $("#careerPath").innerHTML = D.career.map((c, i) => {
-    const next = /^(up )?next/i.test(c.when || ""), yr = next ? "NEXT" : ((String(c.when).match(/\d{4}/g) || [""]).pop());
-    return '<div class="hcard card tilt c-' + col(c.color, i) + (next ? ' next' : '') + ' reveal" style="--d:' + (Math.min(i, 4) * 0.08) + 's">' +
-      '<span class="idx">' + String(i + 1).padStart(2, "0") + '</span><div class="yr">' + esc(yr) + '</div>' +
-      '<div class="when">' + esc(c.when) + '</div><h3>' + esc(c.title) + '</h3><p>' + esc(c.text) + '</p>' +
-      (next ? '<a href="#/contact" class="btn btn-main magnetic"><span>Get in touch</span></a>' : '') + '</div>';
-  }).join("");
-  sizeCareer();
+// ---------- My Timeline ----------
+// animated icon for each moment (each piece has a class the CSS animates)
+const TL_ICONS = {
+  star:   '<g class="core"><path d="M24 7l4.8 9.8 10.8 1.6-7.8 7.6 1.9 10.8L24 31.7l-9.7 5.1 1.9-10.8-7.8-7.6 10.8-1.6z"/></g><circle class="tw t1" cx="41" cy="7" r="2" fill="currentColor" stroke="none"/><circle class="tw t2" cx="6" cy="33" r="1.7" fill="currentColor" stroke="none"/><circle class="tw t3" cx="42" cy="40" r="1.5" fill="currentColor" stroke="none"/>',
+  mic:    '<rect x="18" y="5" width="12" height="22" rx="6"/><path d="M12 21a12 12 0 0 0 24 0M24 33v8M17 41h14"/><path class="wave w1" d="M39 14a9 9 0 0 1 0 12"/><path class="wave w2" d="M44 10a15 15 0 0 1 0 20"/><path class="wave w1" d="M9 14a9 9 0 0 0 0 12"/><path class="wave w2" d="M4 10a15 15 0 0 0 0 20"/>',
+  school: '<path d="M5 42h38M9 42V23l15-9 15 9v19"/><path d="M20 42V32h8v10M14 27h4M30 27h4"/><path d="M24 14V3"/><path class="flag" d="M24 3h11l-3 3.5 3 3.5H24z" fill="currentColor"/>',
+  cap:    '<g class="capg"><path d="M3 18l21-9 21 9-21 9z"/><path d="M11 22v8c0 3.5 5.8 6.5 13 6.5s13-3 13-6.5v-8"/><path d="M41 19.5v11"/><circle cx="41" cy="33" r="2.2" fill="currentColor"/></g>',
+  book:   '<path d="M24 12C19 8 12 7.5 5 9v28c7-1.5 14-1 19 3 5-4 12-4.5 19-3V9c-7-1.5-14-1-19 3z"/><path d="M24 12v28"/><path class="page" d="M24 12c4.5-3 10-4 15-3.2v26c-5-.8-10.5.2-15 3.2"/>',
+  shield: '<path d="M24 4l16 6v12c0 10-7 18-16 22C15 40 8 32 8 22V10z"/><path d="M17 23.5l5 5 9-10"/><path class="scan" d="M12 13h24" stroke-opacity=".75"/>',
+  tv:     '<rect x="4" y="14" width="40" height="27" rx="4"/><path class="ant" d="M16 4l8 9 8-9"/><circle class="rec" cx="37" cy="20.5" r="2.6" fill="#FF3B5C" stroke="none"/><text x="10" y="33" font-size="8" font-weight="700" font-family="Chakra Petch,sans-serif" fill="currentColor" stroke="none" letter-spacing=".5">ON AIR</text>',
+  layers: '<rect class="l3" x="9" y="8" width="27" height="19" rx="3"/><rect class="l2" x="12" y="15" width="27" height="19" rx="3" fill="#0A1733"/><rect class="l1" x="15" y="22" width="27" height="19" rx="3" fill="#0A1733"/><path d="M20 29h10M20 34h16"/>',
+  clap:   '<rect x="5" y="21" width="38" height="22" rx="3"/><path d="M5 29h38"/><g class="top"><path d="M5 21l34-9 2 7-34 9z"/><path d="M13 19l5 6M21 17l5 6M29 15l5 6"/></g>',
+  trophy: '<g class="cup"><path d="M16 5h16v11a8 8 0 0 1-16 0z"/><path d="M16 8.5H9v3a7 7 0 0 0 7 7M32 8.5h7v3a7 7 0 0 1-7 7M24 24v7M18 31h12l2 11H16z"/></g><rect class="cf c1" x="5" y="2" width="3" height="5" rx="1" fill="#FFD166" stroke="none"/><rect class="cf c2" x="40" y="4" width="3" height="5" rx="1" fill="#FF6B8A" stroke="none"/><rect class="cf c3" x="23" y="0" width="3" height="5" rx="1" fill="#4DF0B0" stroke="none"/>',
+  rocket: '<g class="body"><path d="M24 3c7.5 6 9.5 15.5 7.5 25h-15C14.5 18.5 16.5 9 24 3z"/><circle cx="24" cy="16" r="3.2"/><path d="M16.5 25l-6.5 7 7.5-1.2M31.5 25l6.5 7-7.5-1.2"/><path class="flame" d="M19.5 30l4.5 12 4.5-12z" fill="#FFD166" stroke="none"/></g>'
+};
+const BURST = ["#FFD166", "#2EC5FF", "#FF6B8A", "#4DF0B0", "#B57BFF", "#3D7BFF"];
+function ageAt(d){
+  const born = D.timeline.find(t => t.icon === "star" && t.date), b = born && new Date(born.date), x = d && new Date(d);
+  if (!b || !x || isNaN(x) || x <= b) return "";
+  let a = x.getFullYear() - b.getFullYear();
+  if (x.getMonth() < b.getMonth() || (x.getMonth() === b.getMonth() && x.getDate() < b.getDate())) a--;
+  return "Age " + a;
 }
+function renderTimeline(){
+  $("#tlEvents").innerHTML = D.timeline.map((t, i) => {
+    const next = /^(up )?next/i.test(t.when || ""), c = col(t.color, i);
+    const yr = next ? "NEXT" : ((String(t.when).match(/\d{4}/g) || [""])[0]);
+    const tag = t.icon === "star" && i === 0 ? "Day one" : ageAt(t.date);
+    const icon = TL_ICONS[String(t.icon || "").toLowerCase()] || TL_ICONS.star;
+    const bits = yes(t.burst) ? '<span class="bits">' + Array.from({ length: 14 }, (_, k) => '<i style="--a:' + (k * 360 / 14) + 'deg;--b:' + BURST[k % BURST.length] + '"></i>').join("") + '</span>' : "";
+    return '<div class="ev c-' + c + (i % 2 ? ' flip' : '') + '">' +
+      '<div class="tl-card card"><div class="when">' + esc(t.when) + '</div><h3>' + esc(t.title) + '</h3><p>' + esc(t.text) + '</p>' +
+      (next ? '<a href="#/contact" class="btn btn-main magnetic"><span>Get in touch</span></a>' : '') + '</div>' +
+      '<div class="node i-' + esc(String(t.icon || "star").toLowerCase()) + '"><svg viewBox="0 0 48 48" aria-hidden="true">' + icon + '</svg>' + bits + '</div>' +
+      '<div class="tl-date"><span class="yr">' + esc(yr) + '</span>' + (tag ? '<span class="age">' + esc(tag) + '</span>' : '') + '</div></div>';
+  }).join("");
+  $$("#tlEvents .ev").forEach(ev => lighter.observe(ev));
+}
+// a moment lights up once it scrolls past the lower third of the screen
+const lighter = new IntersectionObserver(entries => entries.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("lit"); lighter.unobserve(e.target); }
+}), { rootMargin: "0px 0px -30% 0px" });
 
 // ---------- experience rundown (grouped by organization) ----------
 function renderJobs(){
@@ -1602,7 +1677,7 @@ $("#contactForm").onsubmit = e => {
 };
 
 function render(){
-  renderSettings(); renderTicker(); renderCareer(); renderJobs(); renderVideos(); renderGallery(); renderContact(); wireLinks();
+  renderSettings(); renderTicker(); renderTimeline(); renderJobs(); renderVideos(); renderGallery(); renderContact(); wireLinks();
   $$(".reveal:not(.in)").forEach(el => revealer.observe(el));
 }
 
@@ -1639,12 +1714,12 @@ async function fetchTab(tab, needs){
 const SETTING_KEYS = Object.keys(DEFAULTS.settings).concat(["intro", "bio1", "bio2", "quote", "location", "languages", "education", "lookingFor"]);
 async function loadSheet(){
   const [settings, headlines, career, jobs, videos, photos] = await Promise.all([
-    fetchTab("Settings", ["setting", "value"]), fetchTab("Headlines", ["headline"]), fetchTab("Career", ["title", "when"]),
+    fetchTab("Settings", ["setting", "value"]), fetchTab("Headlines", ["headline"]), fetchTab("Timeline", ["title", "when"]),
     fetchTab("Jobs", ["title", "org"]), fetchTab("Videos", ["title", "link"]), fetchTab("Photos", ["file"])
   ]);
   if (settings) settings.forEach(r => { const k = SETTING_KEYS.find(x => x.toLowerCase() === r.setting.toLowerCase().replace(/[^a-z0-9]/gi, "")); if (k) D.settings[k] = r.value; });
   if (headlines && headlines.length) D.headlines = headlines.map(r => r.headline);
-  if (career && career.length) D.career = career.map(r => ({ when: r.when, title: r.title, text: r.text, color: r.color }));
+  if (career && career.length) D.timeline = career.map(r => ({ date: r.date, when: r.when, title: r.title, text: r.text, icon: r.icon, color: r.color, burst: r.confetti }));
   if (jobs && jobs.length) D.jobs = jobs.map(r => ({ org: r.org, orgDetails: r.orgdetails, show: r.show, title: r.title, dates: r.dates, summary: r.summary, details: r.details, skills: r.skills, color: r.color, video: r.video, photos: r.photos }));
   if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, color: r.color, link: r.link, featured: r.featured }));
   if (photos && photos.length) D.photos = photos.map(r => ({ file: r.file, caption: r.caption, tag: r.tag, color: r.color }));
