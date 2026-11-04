@@ -56,6 +56,14 @@ em.serif,.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-
 .motes .mote-layer{opacity:.85}
 /* anything with a looping animation pauses while it's off screen */
 .paused,.paused *{animation-play-state:paused!important}
+/* while you scroll, the background light holds still (scrolling is when slower devices struggle most) */
+.is-scrolling .bg-fx *,.is-scrolling .motes *{animation-play-state:paused!important}
+/* LITE MODE: switched on automatically when a device can't keep up. Same design, minus the heavy moving extras */
+.lite .bg-fx > :not(.horizon),.lite .motes,.lite .beam,.lite .cur-dot,.lite .cur-ring{display:none!important}
+.lite .horizon,.lite .page-hero .ph-bg,.lite .ring svg.txt,.lite .hero-name .accent .ch,.lite .logo-mark::after{animation:none!important}
+.lite .neon,.lite .logo-mark .sig,.lite .ring .sig,.lite .sig .spark{filter:none!important}
+.lite .neon{fill:#BFE9FF}
+.lite .slide{transform:none!important;transition:opacity 1.4s ease!important}
 
 /* ============ SIGNATURE LOGO ============ */
 .sig{display:block;overflow:visible;fill:currentColor}
@@ -142,7 +150,7 @@ nav.scrolled .icon-btn{border-color:var(--line);color:var(--text);background:tra
 /* photos take turns drifting into center stage and dissolving into the next */
 .hero-media{position:absolute;inset:0;overflow:hidden;background:#040A18}
 /* each photo arrives from a different starting point (set in the script: far away, below, left, right), using only movement + fade so it stays smooth */
-.slide{position:absolute;inset:-2%;opacity:0;transform:translate3d(var(--fx,0),var(--fy,0),0) scale(var(--s0,1.14));transition:opacity 1.6s ease,transform 10s cubic-bezier(.16,.7,.25,1)}
+.slide{position:absolute;inset:-2%;opacity:0;transform:translate3d(var(--fx,0),var(--fy,0),0) scale(var(--s0,1.14));transition:opacity 1.6s ease,transform 3.6s cubic-bezier(.16,.7,.25,1)}
 .slide.on,.slide.off{will-change:transform,opacity}
 /* a beam of light crosses the screen as each photo lands */
 .beam{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
@@ -1104,6 +1112,10 @@ const yes = v => /^(y|yes|true|x|1)$/i.test(String(v || "").trim());
 const COLORS = ["neon", "electric", "gold", "mint", "pink", "purple"];
 const col = (c, i) => COLORS.includes(String(c || "").trim().toLowerCase()) ? String(c).trim().toLowerCase() : COLORS[(i || 0) % COLORS.length];
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// lite mode: turned on automatically for slow devices (see "speed check" below), or by adding ?lite to the address
+let LITE = /[?&]lite\b/.test(location.search);
+try { if (sessionStorage.getItem("bm-lite") === "1" && !/[?&]full\b/.test(location.search)) LITE = true; } catch (e) {}
+if (LITE) document.documentElement.classList.add("lite");
 const FINE = matchMedia("(pointer: fine)").matches;
 // media/ photo names, full links, and Google Drive share links all work
 function imgSrc(f){
@@ -1178,7 +1190,7 @@ function moteLayer(count, w, h, sizes, colors, t){
   return el;
 }
 function buildLight(){
-  if (REDUCED) return;
+  if (REDUCED || LITE) return;
   const w = innerWidth, h = Math.max(innerHeight, 900), small = w < 700;
   const bg = $(".bg-fx"), colors = ["rgba(191,233,255,.9)", "rgba(46,197,255,.85)", "rgba(61,123,255,.8)", "rgba(181,123,255,.7)"];
   bg.innerHTML = '<div class="horizon"></div>';
@@ -1366,7 +1378,13 @@ $$(".split").forEach(splitWords);
 let lastY = scrollY, ticking = false, docH = 1;
 const nav = $("#nav"), bar = $("#progress"), toTop = $("#toTop");
 function measure(){ docH = Math.max(1, document.documentElement.scrollHeight - innerHeight); }
-function onScroll(){ if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+let scrollStop;
+function onScroll(){
+  if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  root.classList.add("is-scrolling");
+  clearTimeout(scrollStop);
+  scrollStop = setTimeout(() => root.classList.remove("is-scrolling"), 200);
+}
 function update(){
   ticking = false;
   const y = scrollY;
@@ -1487,7 +1505,37 @@ $("#footSig").innerHTML = penSig("sig-grad", true); primeSig($("#footSig .sig"))
 revealer.observe($(".foot-lockup"));
 
 // ---------- cursor, magnetic buttons, tilt cards ----------
-if (FINE && !REDUCED) {
+/* ---------- speed check ----------
+   A couple of seconds after the page opens, count how smoothly frames are drawing.
+   If this device is struggling, switch to lite mode for the rest of the visit. */
+function goLite(){
+  if (LITE) return;
+  LITE = true;
+  root.classList.add("lite");
+  document.body.classList.remove("has-cursor");
+  $(".bg-fx").innerHTML = '<div class="horizon"></div>';
+  $(".motes").innerHTML = "";
+  try { sessionStorage.setItem("bm-lite", "1"); } catch (e) {}
+}
+function speedCheck(){
+  if (LITE || REDUCED || /[?&]full\b/.test(location.search) || document.visibilityState !== "visible") return;
+  let frames = 0, slow = 0, start = 0, last = 0, cancelled = false;
+  const stop = () => { cancelled = true; };
+  document.addEventListener("visibilitychange", stop, { once: true });
+  requestAnimationFrame(function f(t){
+    if (cancelled) return;
+    if (!start) { start = last = t; return requestAnimationFrame(f); }
+    const dt = t - last; last = t; frames++;
+    if (dt > 34) slow++;
+    if (t - start < 2500) return requestAnimationFrame(f);
+    document.removeEventListener("visibilitychange", stop);
+    const fps = frames / ((t - start) / 1000);
+    if (fps < 42 || slow > frames * 0.2) goLite();
+  });
+}
+setTimeout(speedCheck, 4500);
+
+if (FINE && !REDUCED && !LITE) {
   document.body.classList.add("has-cursor");
   const dot = $(".cur-dot"), ring = $(".cur-ring"), label = $(".cur-ring span");
   let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, moving = false;
@@ -1519,7 +1567,7 @@ if (FINE && !REDUCED) {
     if (m) { const r = m.getBoundingClientRect(); pulled = m; m.style.translate = ((e.clientX - r.left - r.width / 2) * 0.22).toFixed(1) + "px " + ((e.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + "px"; }
     const t = e.target.closest(".tilt");
     if (tilted && tilted !== t) { tilted.classList.remove("tilting"); tilted.style.setProperty("--rx", "0deg"); tilted.style.setProperty("--ry", "0deg"); tilted = null; }
-    if (t && t.classList.contains("in")) {
+    if (t && !LITE && t.classList.contains("in")) {
       tilted = t;
       const r = t.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
       t.classList.add("tilting");
@@ -1800,7 +1848,10 @@ async function loadSheet(){
   ]);
   if (settings) settings.forEach(r => { const k = SETTING_KEYS.find(x => x.toLowerCase() === r.setting.toLowerCase().replace(/[^a-z0-9]/gi, "")); if (k) D.settings[k] = r.value; });
   if (headlines && headlines.length) D.headlines = headlines.map(r => r.headline);
-  if (career && career.length) D.timeline = career.map(r => ({ date: r.date, when: r.when, title: r.title, text: r.text, icon: r.icon, color: r.color, burst: r.confetti }));
+  // Google Sheets turns text like "June 2019" into a date (6/1/2019); turn it back into words
+  const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const words = v => { const m = String(v || "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? MONTHS[m[1] - 1] + (m[2] === "1" ? " " : " " + m[2] + ", ") + m[3] : v; };
+  if (career && career.length) D.timeline = career.map(r => ({ date: r.date, when: words(r.when), title: r.title, text: r.text, icon: r.icon, color: r.color, burst: r.confetti }));
   if (jobs && jobs.length) D.jobs = jobs.map(r => ({ org: r.org, orgDetails: r.orgdetails, show: r.show, title: r.title, dates: r.dates, summary: r.summary, details: r.details, skills: r.skills, color: r.color, video: r.video, photos: r.photos }));
   if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, color: r.color, link: r.link, featured: r.featured }));
   if (photos && photos.length) D.photos = photos.map(r => ({ file: r.file, caption: r.caption, tag: r.tag, color: r.color }));
