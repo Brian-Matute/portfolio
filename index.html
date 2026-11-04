@@ -45,17 +45,15 @@ em.serif,.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-
 
 /* film grain + drifting color orbs behind everything */
 .bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(700px 600px at 0% 18%,rgba(46,197,255,.09),transparent 70%),radial-gradient(700px 600px at 100% 72%,rgba(181,123,255,.08),transparent 70%)}
-/* specks of light rising forever, streams of light drifting up, and a glow breathing on the horizon */
+/* specks of light rising forever, streaks of light shooting up, and a glow breathing on the horizon */
 .mote-layer{position:absolute;left:0;top:0;width:2px;height:2px;border-radius:50%;animation:moteRise var(--t,90s) linear infinite;will-change:transform}
 .mote-layer::after{content:"";position:absolute;left:0;top:var(--h);width:2px;height:2px;border-radius:50%;box-shadow:inherit}
-.strand{position:absolute;bottom:-60vh;width:2px;height:52vh;border-radius:2px;background:linear-gradient(transparent,rgba(46,197,255,.5) 40%,rgba(191,233,255,.85) 60%,transparent);opacity:0;animation:strand var(--t,12s) var(--d,0s) linear infinite;will-change:transform,opacity}
+/* each streak is a bright core with a soft halo; both are drawn once, then only moved and faded (cheap for any device) */
+.strand{--c:#2EC5FF;position:absolute;bottom:-70vh;width:var(--w,2px);height:var(--len,52vh);border-radius:3px;background:linear-gradient(transparent,color-mix(in srgb,var(--c) 55%,transparent) 40%,#EAF8FF 62%,transparent);opacity:0;animation:strand var(--t,12s) var(--d,0s) linear infinite;will-change:transform,opacity}
+.strand::before{content:"";position:absolute;top:0;bottom:0;left:-4px;right:-4px;border-radius:8px;background:linear-gradient(transparent,color-mix(in srgb,var(--c) 22%,transparent) 40%,color-mix(in srgb,var(--c) 38%,transparent) 62%,transparent)}
 .star-layer{position:absolute;left:0;top:0;width:2px;height:2px;border-radius:50%}
 .star-layer.tw{animation:twinkleField 3.6s ease-in-out infinite alternate}
-.veins{position:absolute;left:50%;bottom:-1vh;width:min(1500px,150vh);height:min(1000px,100vh);transform:translateX(-50%);opacity:.3;animation:veinPulse 7s ease-in-out infinite}
-.strand{box-shadow:0 0 8px rgba(46,197,255,.55)}
-[data-mode="light"] .veins{opacity:.16}
 [data-mode="light"] .star-layer{opacity:.45}
-@media (max-width:700px){.veins{width:170vw;height:85vh}}
 .horizon{position:absolute;left:-20%;right:-20%;bottom:-38vh;height:70vh;background:radial-gradient(50% 50% at 50% 50%,rgba(46,197,255,.2),rgba(61,123,255,.08) 45%,transparent 72%);animation:horizon 10s ease-in-out infinite}
 [data-mode="light"] .mote-layer,[data-mode="light"] .strand{opacity:.55}
 [data-mode="light"] .horizon{opacity:.5}
@@ -67,7 +65,7 @@ em.serif,.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-
    made the browser restyle the whole page at the start and end of every scroll, which was a stutter of its own) */
 /* LITE MODE: switched on automatically when a device can't keep up. Same design, minus the heavy moving extras */
 .lite .mote-layer,.lite .motes,.lite .beam,.lite .cur-dot,.lite .cur-ring{display:none!important}
-.lite .star-layer.tw,.lite .veins{animation:none!important}
+.lite .star-layer.tw{animation:none!important}
 .lite .horizon,.lite .page-hero .ph-bg,.lite .ring svg.txt,.lite .hero-name .accent .ch,.lite .logo-mark::after{animation:none!important}
 .lite .neon,.lite .logo-mark .sig,.lite .ring .sig,.lite .sig .spark{filter:none!important}
 .lite .neon{fill:#BFE9FF}
@@ -653,7 +651,6 @@ footer b{color:#E6F1FF}
 @keyframes fill{to{transform:scaleX(1)}}
 @keyframes kenburns{from{transform:scale(1.04) translate3d(0,0,0)}to{transform:scale(1.14) translate3d(-2%,-1.5%,0)}}
 @keyframes twinkleField{from{opacity:.2}to{opacity:1}}
-@keyframes veinPulse{0%,100%{opacity:.22}50%{opacity:.4}}
 @keyframes moteRise{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,calc(var(--h) * -1),0)}}
 @keyframes strand{0%{transform:translate3d(0,0,0);opacity:0}15%{opacity:.75}80%{opacity:.45}100%{transform:translate3d(var(--sway,0px),-175vh,0);opacity:0}}
 @keyframes horizon{0%,100%{opacity:.55;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.08)}}
@@ -1113,6 +1110,7 @@ const DEFAULTS = {
 
 /* ===================================================================== */
 
+
 // the pen's route through the signature, in writing order (B, A, M, swoosh)
 const PEN = "M335 820 L290 765 L235 695 L182 630 L147 575 L147 510 L182 458 L232 424 L285 414 L322 440 L326 490 L306 548 L282 605 L340 560 L395 522 L440 514 L470 545 L462 598 L430 652 L385 718 L352 775 L345 812 L400 812 L460 782 L510 742 L545 692 L572 635 L560 622 L515 634 L478 646 L495 605 L535 560 L568 515 L568 470 L552 425 L530 385 L520 357 L565 368 L605 390 L645 412 L612 470 L600 520 L592 600 L660 572 L730 552 L780 545 L740 495 L690 455 L652 440 L690 390 L722 368 L795 530 L768 465 L742 400 L730 340 L745 292 L778 274 L804 290 L826 340 L848 400 L862 448 L864 380 L856 315 L852 265 L872 232 L905 220 L950 236 L988 280 L1001 336 L982 397 L935 450 L880 503 L800 565 L700 640 L620 705 L565 765 L528 830 L508 890 L535 935 L600 957 L680 950 L760 925 L840 885 L910 838 L990 772 L1060 700 L1110 640 L1145 580 L1160 538";
 const SPARK = "M1162 488L1172 526L1210 538L1172 550L1162 588L1152 550L1114 538L1152 526Z";
@@ -1219,42 +1217,29 @@ function moteLayer(count, w, h, sizes, colors, t, cls){
   if (t) el.style.setProperty("--t", t + "s");
   return el;
 }
-// a glowing tree of light: branching veins rising from the bottom of the screen, with roots along the ground.
-// It's drawn once; only its brightness pulses.
-function veinsSVG(){
-  const segs = [];
-  const grow = (x, y, len, ang, depth, wid) => {
-    const r = ang * Math.PI / 180, x2 = x + Math.cos(r) * len, y2 = y + Math.sin(r) * len;
-    const bend = (Math.random() - .5) * len * .4, cx = (x + x2) / 2 - Math.sin(r) * bend, cy = (y + y2) / 2 + Math.cos(r) * bend;
-    segs.push(["M" + x.toFixed(1) + " " + y.toFixed(1) + "Q" + cx.toFixed(1) + " " + cy.toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1), wid]);
-    if (depth <= 0) return;
-    const n = depth > 4 || Math.random() < .7 ? 2 : 3;
-    for (let i = 0; i < n; i++) grow(x2, y2, len * (.66 + Math.random() * .14), ang + (i - (n - 1) / 2) * (24 + Math.random() * 18) + (Math.random() - .5) * 12, depth - 1, wid * .72);
-  };
-  grow(500, 1000, 240, -90, 6, 3.4);
-  [[-1, 194], [-1, 206], [1, -14], [1, -26]].forEach(([d, a]) => grow(500 + d * 20, 1000, 170, a, 3, 1.8));
-  const paths = (k, op) => segs.map(([d, w]) => '<path d="' + d + '" stroke-width="' + (w * k).toFixed(2) + '" stroke-opacity="' + op + '"/>').join("");
-  return '<svg class="veins" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMax meet" aria-hidden="true">' +
-    '<defs><linearGradient id="veinGrad" gradientUnits="userSpaceOnUse" x1="0" y1="1000" x2="0" y2="250"><stop offset="0" stop-color="#E6F7FF"/><stop offset=".45" stop-color="#2EC5FF"/><stop offset="1" stop-color="#3D7BFF" stop-opacity="0"/></linearGradient></defs>' +
-    '<g fill="none" stroke="url(#veinGrad)" stroke-linecap="round">' + paths(5, .14) + paths(1, .9) + '</g></svg>';
-}
 function buildLight(){
   const w = innerWidth, h = Math.max(innerHeight, 900), small = w < 700, moving = !REDUCED && !LITE;
   const bg = $(".bg-fx"), colors = ["rgba(191,233,255,.9)", "rgba(46,197,255,.85)", "rgba(61,123,255,.8)", "rgba(181,123,255,.7)"];
-  // always: horizon glow, tree of light, a still starfield and a few twinkling stars (cheap even on slow devices)
-  bg.innerHTML = '<div class="horizon"></div>' + veinsSVG();
+  // always: horizon glow, a still starfield and a few twinkling stars (cheap even on slow devices)
+  bg.innerHTML = '<div class="horizon"></div>';
   bg.appendChild(moteLayer(small ? 60 : 130, w, innerHeight, [.8, 1, 1.4], colors, 0, "star-layer"));
   bg.appendChild(moteLayer(small ? 10 : 22, w, innerHeight, [1.6, 2.2], colors, 0, "star-layer tw"));
   if (REDUCED) return;
   // full mode only: specks of light rising at three speeds.
   // Each layer is a screen-sized image held in graphics memory, so phones get one layer with all three sizes mixed in.
   if (moving) (small ? [[30, [1, 1, 2, 3], 80]] : [[40, [1], 110], [20, [2], 62], [8, [3], 40]]).forEach(([n, s, t]) => bg.appendChild(moteLayer(n, w, h, s, colors, t)));
-  for (let k = 0; k < (LITE ? 2 : small ? 3 : 6); k++) {
+  // streaks of light shooting up the screen. Each one gets its own lane so they spread across the page instead of
+  // clumping, and its own length, thickness, color and speed so they never look like a pattern.
+  const streaks = LITE ? 3 : small ? 5 : 10, hues = ["#2EC5FF", "#2EC5FF", "#3D7BFF", "#B57BFF", "#BFE9FF"];
+  for (let k = 0; k < streaks; k++) {
     const st = document.createElement("i");
     st.className = "strand";
-    st.style.left = (8 + Math.random() * 84).toFixed(1) + "%";
-    st.style.setProperty("--t", (10 + Math.random() * 8).toFixed(1) + "s");
-    st.style.setProperty("--d", (-Math.random() * 16).toFixed(1) + "s");
+    st.style.left = ((k + .2 + Math.random() * .6) / streaks * 92 + 4).toFixed(1) + "%";
+    st.style.setProperty("--c", hues[k % hues.length]);
+    st.style.setProperty("--w", (Math.random() < .3 ? 3 : Math.random() < .5 ? 1 : 2) + "px");
+    st.style.setProperty("--len", (34 + Math.random() * 28).toFixed(0) + "vh");
+    st.style.setProperty("--t", (9 + Math.random() * 9).toFixed(1) + "s");
+    st.style.setProperty("--d", (-Math.random() * 18).toFixed(1) + "s");
     st.style.setProperty("--sway", ((Math.random() - .5) * 80).toFixed(0) + "px");
     bg.appendChild(st);
   }
@@ -1570,7 +1555,7 @@ function goLite(){
   LITE = true;
   root.classList.add("lite");
   document.body.classList.remove("has-cursor");
-  buildLight(); // keeps the stars, tree of light and a couple of light streams; drops the full-screen rising specks
+  buildLight(); // keeps the stars and a few light streaks; drops the full-screen rising specks
   try { sessionStorage.setItem("bm-lite", "1"); } catch (e) {}
 }
 function speedCheck(){
