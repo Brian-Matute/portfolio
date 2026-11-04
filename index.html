@@ -51,11 +51,8 @@ em.serif,.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-
 .strand{position:absolute;bottom:-60vh;width:2px;height:52vh;border-radius:2px;background:linear-gradient(transparent,rgba(46,197,255,.5) 40%,rgba(191,233,255,.85) 60%,transparent);opacity:0;animation:strand var(--t,12s) var(--d,0s) linear infinite;will-change:transform,opacity}
 .star-layer{position:absolute;left:0;top:0;width:2px;height:2px;border-radius:50%}
 .star-layer.tw{animation:twinkleField 3.6s ease-in-out infinite alternate}
-.veins{position:absolute;left:50%;bottom:-1vh;width:min(1500px,150vh);height:min(1000px,100vh);transform:translateX(-50%);opacity:.3;animation:veinPulse 7s ease-in-out infinite}
 .strand{box-shadow:0 0 8px rgba(46,197,255,.55)}
-[data-mode="light"] .veins{opacity:.16}
 [data-mode="light"] .star-layer{opacity:.45}
-@media (max-width:700px){.veins{width:170vw;height:85vh}}
 .horizon{position:absolute;left:-20%;right:-20%;bottom:-38vh;height:70vh;background:radial-gradient(50% 50% at 50% 50%,rgba(46,197,255,.2),rgba(61,123,255,.08) 45%,transparent 72%);animation:horizon 10s ease-in-out infinite}
 [data-mode="light"] .mote-layer,[data-mode="light"] .strand{opacity:.55}
 [data-mode="light"] .horizon{opacity:.5}
@@ -67,7 +64,7 @@ em.serif,.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-
    made the browser restyle the whole page at the start and end of every scroll, which was a stutter of its own) */
 /* LITE MODE: switched on automatically when a device can't keep up. Same design, minus the heavy moving extras */
 .lite .mote-layer,.lite .motes,.lite .beam,.lite .cur-dot,.lite .cur-ring{display:none!important}
-.lite .star-layer.tw,.lite .veins{animation:none!important}
+.lite .star-layer.tw{animation:none!important}
 .lite .horizon,.lite .page-hero .ph-bg,.lite .ring svg.txt,.lite .hero-name .accent .ch,.lite .logo-mark::after{animation:none!important}
 .lite .neon,.lite .logo-mark .sig,.lite .ring .sig,.lite .sig .spark{filter:none!important}
 .lite .neon{fill:#BFE9FF}
@@ -164,6 +161,11 @@ nav.scrolled .icon-btn{border-color:var(--line);color:var(--text);background:tra
 /* each photo arrives from a different starting point (set in the script: far away, below, left, right), using only movement + fade so it stays smooth */
 .slide{position:absolute;inset:-2%;opacity:0;transform:translate3d(var(--fx,0),var(--fy,0),0) scale(var(--s0,1.14));transition:opacity 1.6s ease,transform 3.6s cubic-bezier(.16,.7,.25,1)}
 .slide.on,.slide.off{will-change:transform,opacity}
+/* photos with the subject in the middle slide over to the right on wide screens, fading in from the left, so the name doesn't cover the face */
+@media (min-width:761px){
+  .slide.shift{left:var(--shift)}
+  .slide.shift img{-webkit-mask-image:linear-gradient(90deg,transparent,#000 32%);mask-image:linear-gradient(90deg,transparent,#000 32%)}
+}
 /* a beam of light crosses the screen as each photo lands */
 .beam{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
 .beam::before{content:"";position:absolute;top:-20%;bottom:-20%;left:-30%;width:28%;background:linear-gradient(90deg,transparent,rgba(191,233,255,.0) 20%,rgba(191,233,255,.35) 50%,rgba(191,233,255,0) 80%,transparent);transform:translateX(-60%) skewX(-18deg);opacity:0}
@@ -413,12 +415,49 @@ section{padding:110px 0;position:relative}
 .screen{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:16/9;background:#000}
 .screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .screen .osd{position:absolute;inset:14px;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.18em;color:#BFE9FF;z-index:2}
-.placeholder-video{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#D6E6FF;text-align:center;padding:20px;background:radial-gradient(circle at 50% 50%,rgba(4,10,24,.55),rgba(4,10,24,.92)),url("media/hero.jpg") center/cover}
-.placeholder-video .play{width:92px;height:92px;border-radius:50%;background:var(--neon);display:grid;place-items:center;animation:pulse 2s infinite}
-.placeholder-video .play svg{width:36px;height:36px;margin-left:5px;fill:#03122B}
-.placeholder-video b{font-family:var(--display);font-size:22px;letter-spacing:.06em}
-.placeholder-video small{color:#8EA6CC;max-width:380px;font-size:15px}
+/* the main reel: a big poster with a big play button; clicking swaps in the video */
+.reel-poster{position:absolute;inset:0;width:100%;border:0;padding:20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;color:#E6F1FF;font:inherit;background:#000;overflow:hidden}
+.reel-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;transition:transform 1.4s var(--ease)}
+.reel-poster::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(4,10,24,.25),rgba(4,10,24,.85))}
+.reel-poster:hover img{transform:scale(1.05)}
+.reel-poster > :not(img){position:relative;z-index:1}
+.big-play{width:clamp(78px,11vw,136px);aspect-ratio:1;border-radius:50%;background:var(--neon);display:grid;place-items:center;box-shadow:0 0 50px rgba(46,197,255,.6);transition:transform .4s var(--ease)}
+.big-play::before,.big-play::after{content:"";position:absolute;inset:-12px;border-radius:50%;border:2px solid rgba(46,197,255,.7);animation:ring 2.4s ease-out infinite}
+.big-play::after{animation-delay:1.2s}
+.reel-poster:hover .big-play{transform:scale(1.08)}
+.big-play svg{width:36%;height:36%;margin-left:7%;fill:#03122B}
+.reel-poster b{font-family:var(--display);font-size:clamp(22px,3.4vw,44px);line-height:1;letter-spacing:.06em;text-transform:uppercase;margin-top:8px}
+.reel-poster small{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#BFE9FF}
+.reel-poster.soon{cursor:default}
+.reel-poster.soon .big-play{background:rgba(230,241,255,.16);box-shadow:none}
+.reel-poster.soon .big-play svg{fill:#E6F1FF}
+.reel-poster.soon .big-play::before,.reel-poster.soon .big-play::after{display:none}
+/* the library: tabs by kind of work, filters by show */
+#library{margin-top:90px;scroll-margin-top:80px}
+.lib-bar{margin:6px 0 18px}
+.tabs{display:flex;gap:4px;padding:5px;border-radius:999px;background:var(--card);border:1px solid var(--line);width:max-content;max-width:100%;overflow-x:auto;box-shadow:var(--shadow)}
+.tab{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border-radius:999px;border:0;background:none;color:var(--muted);cursor:pointer;white-space:nowrap;transition:background .3s,color .3s,box-shadow .3s}
+.tab:hover{color:var(--text)}
+.tab.on{background:var(--neon);color:#03122B;box-shadow:0 0 18px rgba(46,197,255,.45)}
+.tab .n{margin-left:7px;font-size:12px;opacity:.65}
+.filter.on .dot{background:#03122B;box-shadow:none}
+.filter .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c);margin-right:8px;vertical-align:1px}
+.lib-anim{animation:pageIn .55s var(--ease) both;animation-delay:var(--d,0s)}
+.lib-empty{padding:46px 24px;text-align:center;color:var(--muted)}
+.lib-empty b{display:block;font-family:var(--display);font-size:22px;text-transform:uppercase;color:var(--text);margin-bottom:4px}
+.episodes{border-top:1px solid var(--line)}
+.episode{--c:var(--neon);display:grid;grid-template-columns:52px 1fr auto;gap:18px;align-items:center;width:100%;padding:16px 10px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer;transition:background .25s}
+.episode:hover{background:color-mix(in srgb,var(--c) 9%,transparent)}
+.episode .logo-badge{width:52px;height:52px;font-size:15px}
+.episode .logo-badge.long{font-size:10px}
+.episode b{display:block;font-size:18px;line-height:1.25}
+.episode small{color:var(--muted);font-size:14px}
+.episode .go{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 75%,var(--text));white-space:nowrap}
+.episode.soon{cursor:default}.episode.soon:hover{background:none}.episode.soon .go{color:var(--muted)}
 .video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.vthumb .wm{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:34px;text-transform:uppercase;color:rgba(230,241,255,.14);letter-spacing:.04em;text-align:center;padding:10px}
+.vthumb .logo-badge{position:absolute;right:10px;bottom:10px;width:44px;height:44px;border-radius:12px;font-size:14px;z-index:1}
+.vthumb .logo-badge.long{font-size:9px}
 .vcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;box-shadow:var(--shadow);text-align:left;font:inherit;color:inherit;padding:0}
 .vcard:hover{border-color:color-mix(in srgb,var(--c) 55%,var(--line));box-shadow:0 0 30px color-mix(in srgb,var(--c) 30%,transparent)}
 .vthumb{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 30%,#0A1733),#040A18);overflow:hidden}
@@ -433,45 +472,64 @@ section{padding:110px 0;position:relative}
 .vbody h3{font-size:17px;margin-bottom:2px}
 .vbody p{font-size:14px;color:var(--muted)}
 .vcard.soon{cursor:default}
+a.vcard{display:block;text-decoration:none}
 @media (max-width:860px){.video-grid{grid-template-columns:1fr 1fr}}
-@media (max-width:560px){.video-grid{grid-template-columns:1fr}.monitor{padding:8px;border-radius:16px}}
+@media (max-width:560px){
+  .video-grid{grid-template-columns:1fr}.monitor{padding:8px;border-radius:16px}
+  .reel-poster{gap:8px}.reel-poster small{font-size:11px}
+  .tabs{width:100%}.tab{flex:1;padding:9px 4px;font-size:12px;letter-spacing:.03em}.tab .n{display:none}
+  .episode{grid-template-columns:44px 1fr;gap:12px}.episode .logo-badge{width:44px;height:44px}.episode .go{grid-column:2}
+}
 
-/* ============ EXPERIENCE (rundown) ============ */
-.org{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:40px 0 14px;padding-bottom:12px;border-bottom:2px solid var(--text)}
-.org h3{font-family:var(--display);font-size:26px;text-transform:uppercase;letter-spacing:.02em}
-.org .where{color:var(--muted);font-weight:600;font-size:15px}
-.job{position:relative;border-bottom:1px solid var(--line)}
-.job::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 14%,transparent),transparent 70%);transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease);pointer-events:none}
-.job:hover::before,.job.open::before{transform:scaleX(1)}
-.job-head{position:relative;width:100%;display:grid;grid-template-columns:56px 1fr auto;gap:18px;align-items:center;padding:22px 8px;background:none;border:0;cursor:pointer;text-align:left;font:inherit;color:inherit}
-.slug{font-family:var(--display);font-weight:700;font-size:28px;color:transparent;-webkit-text-stroke:1.2px color-mix(in srgb,var(--c) 80%,var(--text));transition:color .3s}
-.job:hover .slug,.job.open .slug{color:color-mix(in srgb,var(--c) 80%,var(--text))}
-.job-show{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 72%,var(--text))}
-.job-title{font-size:24px;font-weight:700;line-height:1.2;margin:2px 0;transition:transform .4s var(--ease)}
-.job:hover .job-title{transform:translateX(8px)}
-.job-sum{color:var(--muted);font-size:16px}
-.job-meta{display:flex;align-items:center;gap:14px}
-.date{font-size:14px;font-weight:600;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+/* ============ CAREER (a series of events) ============ */
+/* a show's logo: the image from the Shows tab, or its initials until a logo is added */
+.logo-badge{--c:var(--neon);position:relative;width:56px;height:56px;border-radius:14px;flex:none;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--c) 42%,#0A1733),#040A18 78%);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);color:#fff;font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.04em;line-height:1;text-transform:uppercase;box-shadow:0 0 20px color-mix(in srgb,var(--c) 28%,transparent)}
+.logo-badge.long{font-size:12px;letter-spacing:.06em}
+.logo-badge img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:12%;background:#040A18}
+.show-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:60px}
+.show-pill{display:flex;align-items:center;gap:12px;padding:8px 18px 8px 8px;border-radius:999px;font:inherit;color:var(--text);cursor:pointer;transition:transform .35s var(--ease),border-color .3s,box-shadow .3s}
+.show-pill:hover{transform:translateY(-3px);border-color:var(--c);box-shadow:0 0 24px color-mix(in srgb,var(--c) 30%,transparent)}
+.show-pill .logo-badge{width:44px;height:44px;border-radius:50%;font-size:14px}
+.show-pill .logo-badge.long{font-size:9px}
+.show-pill b{font-family:var(--display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;display:block;line-height:1.1}
+.show-pill small{display:block;font-size:13px;color:var(--muted)}
+.events{position:relative;max-width:1040px}
+.events::before{content:"";position:absolute;left:208px;top:20px;bottom:20px;width:2px;margin-left:-1px;background:linear-gradient(var(--purple),var(--neon) 40%,var(--gold) 75%,var(--pink));opacity:.55;border-radius:2px}
+.event{display:grid;grid-template-columns:150px 72px 1fr;column-gap:22px;align-items:start;margin-bottom:34px}
+.ev-when{grid-column:1;text-align:right;padding-top:12px}
+.ev-when b{display:block;font-family:var(--display);font-weight:700;font-size:30px;line-height:1;text-transform:uppercase;color:color-mix(in srgb,var(--c) 75%,var(--text))}
+.ev-when small{display:block;margin-top:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.event > .logo-badge{grid-column:2;width:72px;height:72px;border-radius:20px;font-size:22px;z-index:1;box-shadow:0 0 0 6px var(--bg),0 0 30px color-mix(in srgb,var(--c) 45%,transparent)}
+.event > .logo-badge.long{font-size:13px}
+.ev-card{grid-column:3;position:relative;overflow:hidden;padding:22px 26px;border-left:3px solid var(--c);transition:box-shadow .3s,border-color .3s,transform .9s var(--ease),opacity .9s var(--ease)}
+.ev-card:hover{box-shadow:0 0 30px color-mix(in srgb,var(--c) 26%,transparent)}
+.ev-card::before{content:"";position:absolute;width:300px;height:300px;top:-150px;right:-130px;background:radial-gradient(circle,color-mix(in srgb,var(--c) 20%,transparent),transparent 65%);pointer-events:none}
+.ev-show{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 72%,var(--text))}
+.ev-show span{color:var(--muted);letter-spacing:.1em}
+.ev-card h3{font-family:var(--display);font-size:26px;line-height:1.1;text-transform:uppercase;margin:4px 0 6px}
+.ev-card > p{color:var(--muted);font-size:16px;margin-bottom:12px}
+.ev-card ul{padding-left:20px;margin-bottom:14px;font-size:16px}
+.ev-card li{margin-bottom:5px}
+.ev-card li::marker{color:var(--c)}
+.event.next .ev-card{border-left-style:dashed}
+@media (max-width:760px){
+  .events::before{left:28px}
+  .event{grid-template-columns:56px 1fr;column-gap:16px}
+  .event > .logo-badge{grid-row:1 / 3;width:56px;height:56px;border-radius:16px;font-size:17px}
+  .event > .logo-badge.long{font-size:10px}
+  .ev-when{grid-column:2;grid-row:1;text-align:left;padding-top:4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .ev-when b{font-size:22px}.ev-when small{margin:0}
+  .ev-card{grid-column:2;grid-row:2;margin-top:10px;padding:18px 18px}
+  .ev-card h3{font-size:22px}
+}
 .chev{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--c,var(--accent)) 50%,var(--line));color:color-mix(in srgb,var(--c,var(--accent)) 75%,var(--text));transition:transform .45s var(--ease),background .3s,color .3s}
 .chev svg{width:18px;height:18px}
-.open > .job-head .chev,.open > .skill-head .chev{transform:rotate(180deg);background:var(--c,var(--accent));color:#03122B;border-color:transparent}
+.open > .skill-head .chev{transform:rotate(180deg);background:var(--c,var(--accent));color:#03122B;border-color:transparent}
 .collapse{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s var(--ease)}
 .open > .collapse{grid-template-rows:1fr}
 .collapse > div{overflow:hidden}
-.job-body{padding:0 8px 24px 82px;opacity:0;transform:translateY(-10px);transition:opacity .4s,transform .5s var(--ease)}
-.open .job-body{opacity:1;transform:none;transition-delay:.12s}
-.job-body ul{padding-left:20px;margin-bottom:14px}
-.job-body li{margin-bottom:6px}
-.job-body li::marker{color:var(--c)}
 .mini-link{display:inline-flex;align-items:center;gap:6px;margin:14px 18px 0 0;font-weight:700;font-size:15px;color:color-mix(in srgb,var(--c,var(--accent)) 72%,var(--text));background:none;border:0;cursor:pointer;font-family:inherit;padding:0}
 .mini-link:hover{text-decoration:underline}
-.expand-all{margin-bottom:6px}
-@media (max-width:640px){
-  .job-head{grid-template-columns:40px 1fr;gap:12px}
-  .job-meta{grid-column:2;justify-content:space-between}
-  .slug{font-size:22px}.job-title{font-size:20px}
-  .job-body{padding-left:52px}
-}
 
 /* ============ SKILLS ============ */
 .skills{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
@@ -655,10 +713,10 @@ footer b{color:#E6F1FF}
 /* ============ ANIMATIONS ============ */
 @keyframes dotPulse{0%{box-shadow:0 0 0 0 rgba(46,197,255,.65)}70%{box-shadow:0 0 0 14px rgba(46,197,255,0)}100%{box-shadow:0 0 0 0 rgba(46,197,255,0)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes ring{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.45);opacity:0}}
 @keyframes fill{to{transform:scaleX(1)}}
 @keyframes kenburns{from{transform:scale(1.04) translate3d(0,0,0)}to{transform:scale(1.14) translate3d(-2%,-1.5%,0)}}
 @keyframes twinkleField{from{opacity:.2}to{opacity:1}}
-@keyframes veinPulse{0%,100%{opacity:.22}50%{opacity:.4}}
 @keyframes moteRise{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,calc(var(--h) * -1),0)}}
 @keyframes strand{0%{transform:translate3d(0,0,0);opacity:0}15%{opacity:.75}80%{opacity:.45}100%{transform:translate3d(var(--sway,0px),-175vh,0);opacity:0}}
 @keyframes horizon{0%,100%{opacity:.55;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.08)}}
@@ -891,7 +949,13 @@ footer b{color:#E6F1FF}
     <h2 class="sec-title split reveal">Reel &amp; <em class="serif">stories</em></h2>
     <p class="sec-sub reveal">My demo reel and some of my packages, live hits and segments. Click any card to watch.</p>
     <div class="monitor reveal zoom"><div class="screen" id="reelFeature"></div></div>
-    <div class="video-grid" id="videoGrid"></div>
+    <div id="library">
+      <span class="kicker c-pink reveal">The library</span>
+      <h2 class="sec-title reveal" style="font-size:clamp(36px,5vw,64px)">Everything I've <em class="serif">worked on</em></h2>
+      <div class="lib-bar reveal"><div class="tabs" role="tablist" id="libTabs"></div></div>
+      <div class="filters reveal" id="showFilters"></div>
+      <div id="libBody"></div>
+    </div>
   </div>
 </section>
 
@@ -901,11 +965,8 @@ footer b{color:#E6F1FF}
 <div class="page" data-page="career" hidden>
 <section id="experience">
   <div class="wrap">
-    <span class="kicker c-electric reveal"><span class="num">04</span> Experience</span>
-    <h2 class="sec-title split reveal">The <em class="serif">rundown</em></h2>
-    <p class="sec-sub reveal">Every role, in order. Click one to read more.</p>
-    <button class="btn btn-line expand-all reveal" id="expandAll"><span>Expand all</span></button>
-    <div id="jobsWrap"></div>
+    <div class="show-row reveal" id="showRow"></div>
+    <div class="events" id="jobsWrap"></div>
   </div>
 </section>
 
@@ -1032,7 +1093,7 @@ footer b{color:#E6F1FF}
    ===================================================================== */
 const SHEET_ID = "1Y28SVrDkHumhBaTSxfbISPFPzkV8211N3u2ucKaV3YU";
 
-/* Built-in content. The sheet's tabs (Settings, Headlines, Career, Jobs, Videos,
+/* Built-in content. The sheet's tabs (Settings, Headlines, Timeline, Jobs, Shows, Videos,
    Photos) replace these when they have rows. Colors: neon, electric, gold, mint, pink, purple */
 const DEFAULTS = {
   settings: {
@@ -1040,7 +1101,8 @@ const DEFAULTS = {
     linkedin: "",
     youtube: "https://www.youtube.com/@brianmatutetv",
     instagram: "https://www.instagram.com/brianmatutetv",
-    heroPhoto: "hero.jpg",
+    // the main image of the site: first photo on the welcome page and the banner on every page
+    heroPhoto: "bio.jpg",
     headshot: "headshot.jpg",
     bioPhoto: "bio.jpg",
     roles: "Multimedia Journalist, Reporter, Producer, Anchor, Storyteller"
@@ -1100,19 +1162,34 @@ const DEFAULTS = {
       details: "Monitored security systems and spotted potential threats to keep the store safe. | Responded quickly to security incidents and worked with local law enforcement when needed. | Kept accurate records of security activity and incident reports.",
       skills: "Situational awareness, Incident response, Documentation" }
   ],
-  // "show" must match a job's Video column so its "Watch..." link can find it.
+  // UMTV shows (and anywhere else you've worked). logo: an image in the media folder (like "newsbreak.png"),
+  // a full image link, or a Google Drive share link. Until a logo is added, the show's initials stand in.
+  // These are used on Career and as the show filters on Reel. The sheet's Shows tab replaces them.
+  shows: [
+    { show: "NewsBreak",  logo: "", color: "neon",     about: "Executive Producer" },
+    { show: "NewsVision", logo: "", color: "gold",     about: "Reporter" },
+    { show: "Pulse",      logo: "", color: "pink",     about: "Reporter" },
+    { show: "PrimeTime",  logo: "", color: "purple",   about: "Audio operator" },
+    { show: "The Culture",logo: "", color: "mint",     about: "Audio operator" },
+    { show: "UniMiami",   logo: "", color: "electric", about: "Audio operator" }
+  ],
+  // type: Reel, Package, Documentary or Produced (an episode you produced). Blank counts as Package.
+  // The featured video is the big player at the top of the Reel page.
+  // link: YouTube or Vimeo plays right on the site; any other link opens in a new tab.
+  // thumb: optional picture for the card (YouTube links get one automatically). date: shown on the card.
   videos: [
-    { title: "Demo Reel",                show: "Reel",       color: "neon", link: "", featured: "yes" },
-    { title: "NewsVision package",       show: "NewsVision", color: "gold", link: "" },
-    { title: "Pulse: Dish It Out",       show: "Pulse",      color: "pink", link: "" },
-    { title: "NewsBreak anchor segment", show: "NewsBreak",  color: "neon", link: "" }
+    { title: "Demo Reel",                show: "Reel",       type: "Reel",    link: "", featured: "yes" },
+    { title: "NewsVision package",       show: "NewsVision", type: "Package", link: "" },
+    { title: "Pulse: Dish It Out",       show: "Pulse",      type: "Package", link: "" },
+    { title: "NewsBreak anchor segment", show: "NewsBreak",  type: "Package", link: "" }
   ],
   // file: a photo in the media folder (like "live-shot.jpg"), a full image link, or a Google Drive share link.
+  // slideshow: "yes" puts the photo in the welcome page slideshow (after the main image).
   // These show until the sheet's Photos tab has rows.
   photos: [
+    { file: "bio.jpg",      caption: "Class of 2026, throwing up the U", tag: "Studio", color: "mint" },
     { file: "hero.jpg",     caption: "Graduation day on the UMTV set",   tag: "Studio", color: "mint" },
-    { file: "headshot.jpg", caption: "At the UMTV anchor desk",          tag: "Studio", color: "mint" },
-    { file: "bio.jpg",      caption: "Class of 2026, throwing up the U", tag: "Studio", color: "mint" }
+    { file: "headshot.jpg", caption: "At the UMTV anchor desk",          tag: "Studio", color: "mint" }
   ]
 };
 
@@ -1235,30 +1312,11 @@ function moteLayer(count, w, h, sizes, colors, t, cls){
   if (t) el.style.setProperty("--t", t + "s");
   return el;
 }
-// a glowing tree of light: branching veins rising from the bottom of the screen, with roots along the ground.
-// It's drawn once; only its brightness pulses.
-function veinsSVG(){
-  const segs = [];
-  const grow = (x, y, len, ang, depth, wid) => {
-    const r = ang * Math.PI / 180, x2 = x + Math.cos(r) * len, y2 = y + Math.sin(r) * len;
-    const bend = (Math.random() - .5) * len * .4, cx = (x + x2) / 2 - Math.sin(r) * bend, cy = (y + y2) / 2 + Math.cos(r) * bend;
-    segs.push(["M" + x.toFixed(1) + " " + y.toFixed(1) + "Q" + cx.toFixed(1) + " " + cy.toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1), wid]);
-    if (depth <= 0) return;
-    const n = depth > 4 || Math.random() < .7 ? 2 : 3;
-    for (let i = 0; i < n; i++) grow(x2, y2, len * (.66 + Math.random() * .14), ang + (i - (n - 1) / 2) * (24 + Math.random() * 18) + (Math.random() - .5) * 12, depth - 1, wid * .72);
-  };
-  grow(500, 1000, 240, -90, 6, 3.4);
-  [[-1, 194], [-1, 206], [1, -14], [1, -26]].forEach(([d, a]) => grow(500 + d * 20, 1000, 170, a, 3, 1.8));
-  const paths = (k, op) => segs.map(([d, w]) => '<path d="' + d + '" stroke-width="' + (w * k).toFixed(2) + '" stroke-opacity="' + op + '"/>').join("");
-  return '<svg class="veins" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMax meet" aria-hidden="true">' +
-    '<defs><linearGradient id="veinGrad" gradientUnits="userSpaceOnUse" x1="0" y1="1000" x2="0" y2="250"><stop offset="0" stop-color="#E6F7FF"/><stop offset=".45" stop-color="#2EC5FF"/><stop offset="1" stop-color="#3D7BFF" stop-opacity="0"/></linearGradient></defs>' +
-    '<g fill="none" stroke="url(#veinGrad)" stroke-linecap="round">' + paths(5, .14) + paths(1, .9) + '</g></svg>';
-}
 function buildLight(){
   const w = innerWidth, h = Math.max(innerHeight, 900), small = w < 700, moving = !REDUCED && !LITE;
   const bg = $(".bg-fx"), colors = ["rgba(191,233,255,.9)", "rgba(46,197,255,.85)", "rgba(61,123,255,.8)", "rgba(181,123,255,.7)"];
-  // always: horizon glow, tree of light, a still starfield and a few twinkling stars (cheap even on slow devices)
-  bg.innerHTML = '<div class="horizon"></div>' + veinsSVG();
+  // always: horizon glow, a still starfield and a few twinkling stars (cheap even on slow devices)
+  bg.innerHTML = '<div class="horizon"></div>';
   bg.appendChild(moteLayer(small ? 60 : 130, w, innerHeight, [.8, 1, 1.4], colors, 0, "star-layer"));
   bg.appendChild(moteLayer(small ? 10 : 22, w, innerHeight, [1.6, 2.2], colors, 0, "star-layer tw"));
   if (REDUCED) return;
@@ -1316,20 +1374,24 @@ setInterval(() => {
 // ---------- hero slideshow: photos drift into center stage and dissolve into the next ----------
 // where each photo's subject sits, so the framing looks right (desktop, then phone)
 // computers show each photo centered (keeps the most in frame); phones aim at the face
-const FOCUS = { "hero.jpg": ["50% 30%", "77% 12%"], "headshot.jpg": ["50% 40%", "64% 30%"], "bio.jpg": ["50% 30%", "50% 18%"] };
+// (a third value moves the photo that far right on computers, for photos with the subject in the middle)
+const FOCUS = { "hero.jpg": ["50% 30%", "77% 12%"], "headshot.jpg": ["50% 40%", "64% 30%", "24%"], "bio.jpg": ["50% 26%", "50% 18%", "26%"] };
 const ENTRANCES = ["far", "below", "left", "right"];
 let fxN = 0;
 const SLIDE_MS = 7000;
 let slides = [], si = -1, slideTimer = null;
 function buildSlides(){
   const S = D.settings, files = [];
-  [S.heroPhoto, S.headshot, S.bioPhoto].concat(D.photos.map(p => p.file)).forEach(f => { const src = imgSrc(f); if (src && !files.includes(src) && files.length < 6) files.push(src); });
+  // the main image always comes first. Photos marked "yes" in the Photos tab's Slideshow column follow it;
+  // with none marked, the slideshow uses your other photos
+  const picked = D.photos.filter(p => yes(p.slideshow)).map(p => p.file);
+  [S.heroPhoto].concat(picked.length ? picked : [S.headshot, S.bioPhoto].concat(D.photos.map(p => p.file))).forEach(f => { const src = imgSrc(f); if (src && !files.includes(src) && files.length < 6) files.push(src); });
   if (slides.length && slides.map(s => s.src).join() === files.join()) return;
   const caption = src => { const p = D.photos.find(x => imgSrc(x.file) === src); return p && p.caption ? p.caption : "On the UMTV set"; };
   slides = files.map(src => ({ src, cap: caption(src) }));
   $("#heroMedia").innerHTML = slides.map(s => {
     const f = FOCUS[s.src.split("/").pop()] || ["60% 35%", "60% 25%"];
-    return '<div class="slide" style="--pos:' + f[0] + ';--posm:' + f[1] + '"><img src="' + esc(s.src) + '" alt="' + esc(s.cap) + '" decoding="async"></div>';
+    return '<div class="slide' + (f[2] ? ' shift' : '') + '" style="--pos:' + f[0] + ';--posm:' + f[1] + (f[2] ? ';--shift:' + f[2] : '') + '"><img src="' + esc(s.src) + '" alt="' + esc(s.cap) + '" decoding="async"></div>';
   }).join("");
   // skip a photo that fails to load, or that's too small to look sharp full-screen on this device
   $$("#heroMedia img").forEach((img, i) => {
@@ -1486,15 +1548,15 @@ $("#toTop").onclick = () => scrollTo({ top: 0, behavior: "smooth" });
    Like the BAM Fantasy site: a welcome page that links out to each area.
    Every page lives in this one file and is shown by its web address (#/reel, #/career...). */
 const PAGES = [
-  { r: "career",  title: "Career",          kicker: "The rundown",       sub: "Every role I've held, in order. Click one to read more.",              photo: "bio.jpg",  color: "electric",
+  { r: "career",  title: "Career",          kicker: "The rundown",       sub: "The shows I've worked on, and every step from the anchor desk to executive producer.", color: "electric",
     blurb: "Every role at UMTV and beyond, from anchor desk to executive producer.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg>' },
-  { r: "reel",    title: "Reel",            kicker: "On camera",         sub: "My demo reel and some of my packages, live hits and segments.",          photo: "hero.jpg", color: "pink",
-    blurb: "My demo reel, packages, live hits and segments.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg>' },
-  { r: "gallery", title: "Gallery",         kicker: "Behind the scenes", sub: "In the studio, in the field and behind the camera.",                    photo: "hero.jpg", color: "purple",
+  { r: "reel",    title: "Reel",            kicker: "On camera",         sub: "Start with my demo reel, then scroll for my packages, documentaries and the episodes I've produced.", color: "pink",
+    blurb: "My demo reel, packages, documentaries and produced episodes.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg>' },
+  { r: "gallery", title: "Gallery",         kicker: "Behind the scenes", sub: "In the studio, in the field and behind the camera.",                    color: "purple",
     blurb: "Photos from the studio, the field and behind the camera.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' },
-  { r: "resume",  title: "Resume",          kicker: "On paper",          sub: "Read it here, open it full screen, or download a copy.",                photo: "bio.jpg",  color: "gold",
+  { r: "resume",  title: "Resume",          kicker: "On paper",          sub: "Read it here, open it full screen, or download a copy.",                color: "gold",
     blurb: "My one-page resume, plus education and honors.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>' },
-  { r: "contact", title: "Contact",         kicker: "Get in touch",      sub: "I'm open to reporting, producing and multimedia journalism roles.",     photo: "hero.jpg", color: "neon",
+  { r: "contact", title: "Contact",         kicker: "Get in touch",      sub: "I'm open to reporting, producing and multimedia journalism roles.",     color: "neon",
     blurb: "Email, socials, or send me a message right here.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>' }
 ];
 // where the face sits in each photo, so wide banners never crop it off
@@ -1505,7 +1567,9 @@ PAGES.forEach((p, i) => {
   ["kicker", "sec-title", "sec-sub"].forEach(c => { const el = $(":scope > .wrap > ." + c, sec); if (el) el.remove(); });
   const hero = document.createElement("header");
   hero.className = "page-hero c-" + p.color;
-  hero.innerHTML = '<div class="ph-bg"><img src="' + imgSrc(p.photo) + '" alt="" decoding="async" style="--pos:' + (PHOTO_FOCUS[p.photo] || "60% 30%") + '"></div>' +
+  // every page's banner is the site's main image (a page can still set its own photo)
+  const banner = p.photo || D.settings.heroPhoto;
+  hero.innerHTML = '<div class="ph-bg"><img src="' + imgSrc(banner) + '" alt="" decoding="async" style="--pos:' + (PHOTO_FOCUS[banner] || "60% 30%") + '"></div>' +
     '<div class="wrap"><div class="crumbs"><a href="#/">Home</a><span>/</span><span>' + p.title + '</span></div>' +
     '<span class="kicker">' + p.kicker + '</span><h1 class="sec-title split">' + p.title + '</h1><p class="sec-sub">' + p.sub + '</p></div>';
   page.prepend(hero);
@@ -1586,7 +1650,7 @@ function goLite(){
   LITE = true;
   root.classList.add("lite");
   document.body.classList.remove("has-cursor");
-  buildLight(); // keeps the stars, tree of light and a couple of light streams; drops the full-screen rising specks
+  buildLight(); // keeps the stars and a couple of light streams; drops the full-screen rising specks
   try { sessionStorage.setItem("bm-lite", "1"); } catch (e) {}
 }
 function speedCheck(){
@@ -1663,16 +1727,11 @@ if (FINE && !REDUCED && !LITE) {
 
 // ---------- collapsible sections ----------
 document.addEventListener("click", e => {
-  const head = e.target.closest(".job-head, .skill-head");
+  const head = e.target.closest(".skill-head");
   if (!head) return;
   const box = head.parentElement, open = box.classList.toggle("open");
   head.setAttribute("aria-expanded", open);
 });
-$("#expandAll").onclick = function(){
-  const jobs = $$(".job"), openAll = !jobs.every(j => j.classList.contains("open"));
-  jobs.forEach(j => { j.classList.toggle("open", openAll); $(".job-head", j).setAttribute("aria-expanded", openAll); });
-  $("span", this).textContent = openAll ? "Collapse all" : "Expand all";
-};
 
 // ---------- settings: text, photos, rotating roles ----------
 function renderSettings(){
@@ -1742,32 +1801,55 @@ const lighter = new IntersectionObserver(entries => entries.forEach(e => {
   if (e.isIntersecting) { e.target.classList.add("lit"); lighter.unobserve(e.target); }
 }), { rootMargin: "0px 0px -30% 0px" });
 
-// ---------- experience rundown (grouped by organization) ----------
+// ---------- show logos ----------
+const showInfo = name => D.shows.find(s => s.show.toLowerCase() === String(name || "").trim().toLowerCase());
+// stand-in until a logo is added: short names as-is, longer ones as their capitals (NewsBreak → NB)
+function initials(name){
+  name = String(name || "").trim();
+  if (name.length <= 6) return name;
+  const caps = name.match(/[A-Z0-9]/g) || [];
+  return caps.length >= 2 ? caps.slice(0, 3).join("") : name.slice(0, 2);
+}
+function logoBadge(name, color, logo){
+  const s = showInfo(name) || {}, src = imgSrc(logo || s.logo), txt = initials(name);
+  return '<span class="logo-badge c-' + col(color || s.color) + (txt.length > 3 ? ' long' : '') + '" title="' + esc(name) + '">' + esc(txt) +
+    (src ? '<img src="' + esc(src) + '" alt="' + esc(name) + ' logo" loading="lazy" onerror="this.remove()">' : '') + '</span>';
+}
+
+// ---------- career: one event per role, oldest first ----------
+const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+function startOf(dates){
+  const m = String(dates || "").match(/([A-Za-z]{3})[a-z]*\.?\s+(\d{4})/);
+  if (m) return +m[2] * 12 + (MON[m[1].toLowerCase()] || 0);
+  const y = String(dates || "").match(/\d{4}/);
+  return y ? +y[0] * 12 : 1e9;
+}
 function renderJobs(){
-  const groups = [];
-  D.jobs.forEach(j => {
-    let g = groups.find(x => x.org === j.org);
-    if (!g) groups.push(g = { org: j.org, details: "", jobs: [] });
-    if (!g.details && j.orgDetails) g.details = j.orgDetails;
-    g.jobs.push(j);
-  });
-  let n = 0;
-  $("#jobsWrap").innerHTML = groups.map(g =>
-    '<div class="org reveal"><h3>' + esc(g.org) + '</h3><span class="where">' + esc(g.details) + '</span></div>' +
-    g.jobs.map(j => {
-      const items = String(j.details || "").split("|").map(x => x.trim()).filter(Boolean), k = n++;
-      return '<div class="job c-' + col(j.color, k) + ' reveal" style="--d:' + (k % 4 * 0.06) + 's"><button class="job-head" aria-expanded="false">' +
-        '<span class="slug">' + String(k + 1).padStart(2, "0") + '</span>' +
-        '<div><div class="job-show">' + esc(j.show) + '</div><div class="job-title">' + esc(j.title) + '</div><div class="job-sum">' + esc(j.summary) + '</div></div>' +
-        '<div class="job-meta"><span class="date">' + esc(j.dates) + '</span>' + ICON.chev + '</div></button>' +
-        '<div class="collapse"><div><div class="job-body">' +
-        (items.length ? '<ul>' + items.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : '') +
-        '<div class="chips">' + list(j.skills).map(s => '<span class="chip">' + esc(s) + '</span>').join("") + '</div>' +
-        (j.photos ? '<button class="mini-link" data-filter="' + esc(j.photos) + '">See ' + esc(j.photos) + ' photos →</button>' : '') +
-        (j.video ? '<button class="mini-link" data-video="' + esc(j.video) + '">Watch ' + esc(j.video) + ' →</button>' : '') +
-        '</div></div></div></div>';
-    }).join("")).join("");
-  $("#expandAll span").textContent = "Expand all";
+  $("#showRow").innerHTML = D.shows.map((s, i) =>
+    '<button class="show-pill card c-' + col(s.color, i) + '" data-show="' + esc(s.show) + '" data-cursor="WATCH">' + logoBadge(s.show, s.color, s.logo) +
+    '<span><b>' + esc(s.show) + '</b>' + (s.about ? '<small>' + esc(s.about) + '</small>' : '') + '</span></button>').join("");
+  // jobs that started the same month keep the sheet's order
+  const jobs = D.jobs.map((j, i) => ({ j, i, at: startOf(j.dates) })).sort((a, b) => a.at - b.at || a.i - b.i);
+  $("#jobsWrap").innerHTML = jobs.map(({ j }, k) => {
+    const items = String(j.details || "").split("|").map(x => x.trim()).filter(Boolean);
+    const c = col(j.color || (showInfo(j.show) || {}).color, k), start = String(j.dates || "").split(/\s+[–—-]\s+/)[0];
+    // "University of Miami Television (UMTV)" → "UMTV"
+    const org = (String(j.org || "").match(/\(([^)]+)\)/) || [, j.org])[1];
+    return '<div class="event c-' + c + '">' +
+      '<div class="ev-when reveal"><b>' + esc(start) + '</b>' + (start !== j.dates ? '<small>' + esc(j.dates) + '</small>' : '') + '</div>' +
+      // a role that isn't on a listed show wears its organization's badge instead (Target, UMTV)
+      logoBadge(showInfo(j.show) || j.logo || !org ? j.show : org, c, j.logo) +
+      '<div class="ev-card card reveal right"><div class="ev-show">' + esc(j.show) + (org && org !== j.show ? ' <span>· ' + esc(org) + '</span>' : '') + '</div>' +
+      '<h3>' + esc(j.title) + '</h3>' + (j.summary ? '<p>' + esc(j.summary) + '</p>' : '') +
+      (items.length ? '<ul>' + items.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : '') +
+      '<div class="chips">' + list(j.skills).map(s => '<span class="chip">' + esc(s) + '</span>').join("") + '</div>' +
+      (j.video ? '<button class="mini-link" data-show="' + esc(j.video) + '">Watch my ' + esc(j.video) + ' work →</button>' : '') +
+      (j.photos ? '<button class="mini-link" data-filter="' + esc(j.photos) + '">See ' + esc(j.photos) + ' photos →</button>' : '') +
+      '</div></div>';
+  }).join("") +
+    '<div class="event next c-neon"><div class="ev-when reveal"><b>Next</b></div><span class="logo-badge c-neon">★</span>' +
+    '<div class="ev-card card reveal right"><div class="ev-show">Up next</div><h3>Your newsroom?</h3>' +
+    '<p>Looking for my next role as a reporter, producer or multimedia journalist.</p><a href="#/contact" class="btn btn-main magnetic"><span>Get in touch</span></a></div></div>';
 }
 
 // ---------- videos ----------
@@ -1777,21 +1859,104 @@ function embedUrl(url){
   const m = url && url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   return m ? "https://player.vimeo.com/video/" + m[1] : "";
 }
-let others = [];
-function renderVideos(){
-  const V = D.videos, featured = V.find(v => yes(v.featured)) || V[0];
-  others = V.filter(v => v !== featured);
-  $("#reelFeature").innerHTML = featured && embedUrl(featured.link)
-    ? '<iframe src="' + embedUrl(featured.link) + '" title="' + esc(featured.title) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>'
-    : '<div class="osd"><span>● STANDBY</span><span class="tc">00:00:00:00</span></div><div class="placeholder-video"><span class="play">' + ICON.play + '</span><b>Demo reel coming soon</b><small>Add a YouTube or Vimeo link to the featured video and it will play here.</small></div>';
-  $("#videoGrid").innerHTML = others.map((v, i) => {
-    const ok = !!embedUrl(v.link), id = ytId(v.link);
-    return '<button class="vcard tilt c-' + col(v.color, i) + ' reveal' + (ok ? '' : ' soon') + '" data-vi="' + i + '" style="--d:' + (i % 3 * 0.1) + 's"' + (ok ? ' data-cursor="PLAY"' : ' disabled') + '>' +
-      '<div class="vthumb">' + (id ? '<img src="https://i.ytimg.com/vi/' + id + '/hqdefault.jpg" alt="" loading="lazy">' : '') +
-      '<div class="p"><span>' + ICON.play + '</span></div><span class="vtag">' + esc(v.show) + '</span></div>' +
-      '<div class="vbody"><h3>' + esc(v.title) + '</h3><p>' + (ok ? 'Click to watch' : 'Video coming soon') + '</p></div></button>';
-  }).join("");
-  $$(".vcard").forEach(c => c.onclick = () => openVideo(others[+c.dataset.vi]));
+// what kind of work a video is: decides which Reel tab it sits in
+const TABS = [["package", "Packages"], ["documentary", "Documentaries"], ["produced", "Produced"]];
+function vType(v){
+  const t = String(v.type || "").toLowerCase();
+  if (/reel/.test(t)) return "reel";
+  if (/doc/.test(t)) return "documentary";
+  if (/produc|episode/.test(t)) return "produced";
+  return "package";
+}
+const vColor = (v, i) => col(v.color || (showInfo(v.show) || {}).color, i);
+let featured = null, library = [];
+const lib = { tab: "package", show: "All" };
+const findFeatured = () => D.videos.find(v => yes(v.featured)) || D.videos.find(v => vType(v) === "reel") || null;
+
+// the main reel: poster + big play button; the video only loads once it's clicked
+function renderReel(){
+  featured = findFeatured();
+  const src = featured ? embedUrl(featured.link) : "", id = featured ? ytId(featured.link) : "";
+  const poster = featured && featured.thumb ? imgSrc(featured.thumb) : id ? "https://i.ytimg.com/vi/" + id + "/maxresdefault.jpg" : imgSrc(D.settings.heroPhoto);
+  $("#reelFeature").innerHTML = '<div class="osd"><span>' + (src ? "● READY" : "● STANDBY") + '</span><span class="tc">00:00:00:00</span></div>' +
+    '<button class="reel-poster' + (src ? '' : ' soon') + '" id="reelPlay"' + (src ? ' data-cursor="PLAY"' : '') + ' aria-label="Play ' + esc(featured ? featured.title : "demo reel") + '">' +
+    '<img src="' + esc(poster) + '" alt="" decoding="async"><span class="big-play">' + ICON.play + '</span>' +
+    '<b>' + esc(featured ? featured.title : "Demo Reel") + '</b><small>' + (src ? "Click to play" : "Coming soon") + '</small></button>';
+  // YouTube only has the extra-sharp poster for some videos; fall back to the standard one
+  const img = $("#reelPlay img");
+  if (id && !(featured && featured.thumb)) {
+    const hq = () => { img.onerror = null; img.src = "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg"; };
+    img.onerror = hq; img.onload = () => { if (img.naturalWidth <= 120) hq(); };
+  }
+  $("#reelPlay").onclick = () => {
+    if (!src) return;
+    $("#reelFeature").innerHTML = '<iframe src="' + src + (src.includes("?") ? "&" : "?") + 'autoplay=1" title="' + esc(featured.title) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  };
+}
+
+// everything else, sorted into tabs and filterable by show
+function libShows(){
+  const names = [];
+  D.shows.forEach(s => { if (library.some(v => v.show === s.show)) names.push(s.show); });
+  library.forEach(v => { if (v.show && !names.includes(v.show)) names.push(v.show); });
+  return names;
+}
+function renderLibrary(){
+  const top = findFeatured();
+  library = D.videos.filter(v => v !== top && vType(v) !== "reel");
+  const shows = libShows();
+  if (lib.show !== "All" && !shows.includes(lib.show)) lib.show = "All";
+  const inShow = v => lib.show === "All" || v.show === lib.show;
+  $("#libTabs").innerHTML = TABS.map(([k, label]) =>
+    '<button class="tab' + (lib.tab === k ? ' on' : '') + '" role="tab" aria-selected="' + (lib.tab === k) + '" data-tab="' + k + '">' + label +
+    '<span class="n">' + library.filter(v => vType(v) === k && inShow(v)).length + '</span></button>').join("");
+  $("#showFilters").innerHTML = shows.length > 1 ? ['All'].concat(shows).map((s, i) =>
+    '<button class="filter c-' + (s === "All" ? "neon" : col((showInfo(s) || {}).color, i)) + (lib.show === s ? ' on' : '') + '" data-show-f="' + esc(s) + '">' +
+    (s === "All" ? "All shows" : '<span class="dot"></span>' + esc(s)) + '</button>').join("") : "";
+  const label = TABS.find(t => t[0] === lib.tab)[1], items = library.filter(v => vType(v) === lib.tab && inShow(v));
+  // YouTube/Vimeo links play here; any other link opens in a new tab; no link yet means "coming soon"
+  const open = (v, cls, i, inner, cursor) => {
+    const style = ' style="--d:' + (i % 9 * 0.05) + 's"';
+    if (embedUrl(v.link)) return '<button class="' + cls + '" data-li="' + library.indexOf(v) + '" data-cursor="' + cursor + '"' + style + '>' + inner + '</button>';
+    if (v.link) return '<a class="' + cls + '" href="' + esc(v.link) + '" target="_blank" rel="noopener" data-cursor="OPEN"' + style + '>' + inner + '</a>';
+    return '<div class="' + cls + ' soon"' + style + '>' + inner + '</div>';
+  };
+  const meta = v => [v.show, v.date].filter(Boolean).map(esc).join(" · ");
+  let html;
+  if (!items.length) {
+    html = '<div class="lib-empty card lib-anim"><b>' + (lib.show === "All" ? label + " coming soon" : "No " + esc(lib.show) + " " + label.toLowerCase() + " yet") + '</b>' +
+      (lib.show === "All" ? "Check back soon." : '<button class="mini-link" data-show-f="All">See all shows →</button>') + '</div>';
+  } else if (lib.tab === "produced") {
+    // produced episodes: a running list, newest at the top of the sheet
+    html = '<div class="episodes">' + items.map((v, i) => open(v, "episode lib-anim c-" + vColor(v, i), i,
+      logoBadge(v.show, v.color) + '<span><b>' + esc(v.title) + '</b><small>' + meta(v) + '</small></span>' +
+      '<span class="go">' + (embedUrl(v.link) ? "Watch ▶" : v.link ? "Open ↗" : "Coming soon") + '</span>', "PLAY")).join("") + '</div>';
+  } else {
+    html = '<div class="video-grid">' + items.map((v, i) => {
+      const id = ytId(v.link), thumb = v.thumb ? imgSrc(v.thumb) : id ? "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg" : "";
+      return open(v, "vcard tilt in lib-anim c-" + vColor(v, i), i,
+        '<div class="vthumb">' + (thumb ? '<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '<span class="wm">' + esc(v.show || label) + '</span>') +
+        (v.link ? '<div class="p"><span>' + ICON.play + '</span></div>' : '') + logoBadge(v.show, v.color) + '</div>' +
+        '<div class="vbody"><h3>' + esc(v.title) + '</h3><p>' + (meta(v) || label) + (v.link ? '' : ' · Coming soon') + '</p></div>', "PLAY");
+    }).join("") + '</div>';
+  }
+  $("#libBody").innerHTML = html;
+  $$("#libTabs .tab").forEach(b => b.onclick = () => { lib.tab = b.dataset.tab; renderLibrary(); });
+  $$("[data-show-f]").forEach(b => b.onclick = () => setShow(b.dataset.showF));
+  $$("#libBody [data-li]").forEach(b => b.onclick = () => openVideo(library[+b.dataset.li]));
+}
+// pick a show; if it has nothing in the open tab, jump to a tab where it does
+function setShow(name){
+  lib.show = name;
+  const has = k => library.some(v => vType(v) === k && (name === "All" || v.show === name));
+  if (!has(lib.tab)) { const t = TABS.find(([k]) => has(k)); if (t) lib.tab = t[0]; }
+  renderLibrary();
+}
+// from Career: open the Reel page's library, filtered to one show
+function openShow(name){
+  setShow(name);
+  if (page !== "reel") location.hash = "#/reel";
+  setTimeout(() => $("#library").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth" }), 350);
 }
 
 // ---------- filmstrip + gallery ----------
@@ -1818,10 +1983,10 @@ function setFilter(f){
 
 // "Watch..." and "See photos" links in Experience; hidden until there's something to show
 function wireLinks(){
-  $$("[data-video]").forEach(b => {
-    const v = D.videos.find(x => x.show === b.dataset.video && embedUrl(x.link));
-    if (!v) { b.remove(); return; }
-    b.onclick = () => openVideo(v);
+  $$("#jobsWrap [data-show], #showRow [data-show]").forEach(b => {
+    // a "Watch" link only shows when that show has videos; the show logos always link to the Reel library
+    if (b.classList.contains("mini-link") && !D.videos.some(x => x.show === b.dataset.show && vType(x) !== "reel")) { b.remove(); return; }
+    b.onclick = () => openShow(b.dataset.show);
   });
   $$("[data-filter]").forEach(b => {
     if (!D.photos.some(p => p.tag === b.dataset.filter)) { b.remove(); return; }
@@ -1898,8 +2063,8 @@ function render(){
   if (changed("ticker", D.headlines)) renderTicker();
   if (changed("timeline", D.timeline)) renderTimeline();
   // the job list's "Watch" and "See photos" links depend on the videos and photos too
-  if (changed("jobs", [D.jobs, D.videos, D.photos])) { renderJobs(); wireLinks(); }
-  if (changed("videos", D.videos)) renderVideos();
+  if (changed("videos", [D.videos, D.shows, D.settings.heroPhoto])) { renderReel(); renderLibrary(); }
+  if (changed("jobs", [D.jobs, D.shows, D.videos, D.photos])) { renderJobs(); wireLinks(); }
   if (changed("photos", D.photos)) renderGallery();
   if (changed("contact", D.settings)) renderContact();
   $$(".reveal:not(.in)").forEach(el => revealer.observe(el));
@@ -1943,7 +2108,7 @@ function cachedSheet(){ try { const c = JSON.parse(localStorage.getItem(SHEET_CA
 async function loadSheet(){
   const tabs = await Promise.all([
     fetchTab("Settings", ["setting", "value"]), fetchTab("Headlines", ["headline"]), fetchTab("Timeline", ["title", "when"]),
-    fetchTab("Jobs", ["title", "org"]), fetchTab("Videos", ["title", "link"]), fetchTab("Photos", ["file"])
+    fetchTab("Jobs", ["title", "org"]), fetchTab("Videos", ["title", "link"]), fetchTab("Photos", ["file"]), fetchTab("Shows", ["show"])
   ]);
   // if every tab failed (offline, sheet unshared), keep whatever is showing
   if (tabs.every(t => !t)) return;
@@ -1952,16 +2117,17 @@ async function loadSheet(){
   applySheet(tabs);
   render();
 }
-function applySheet([settings, headlines, career, jobs, videos, photos]){
+function applySheet([settings, headlines, career, jobs, videos, photos, shows]){
   if (settings) settings.forEach(r => { const k = SETTING_KEYS.find(x => x.toLowerCase() === r.setting.toLowerCase().replace(/[^a-z0-9]/gi, "")); if (k) D.settings[k] = r.value; });
   if (headlines && headlines.length) D.headlines = headlines.map(r => r.headline);
   // Google Sheets turns text like "June 2019" into a date (6/1/2019); turn it back into words
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const words = v => { const m = String(v || "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? MONTHS[m[1] - 1] + (m[2] === "1" ? " " : " " + m[2] + ", ") + m[3] : v; };
   if (career && career.length) D.timeline = career.map(r => ({ date: r.date, when: words(r.when), title: r.title, text: r.text, icon: r.icon, color: r.color, burst: r.confetti }));
-  if (jobs && jobs.length) D.jobs = jobs.map(r => ({ org: r.org, orgDetails: r.orgdetails, show: r.show, title: r.title, dates: r.dates, summary: r.summary, details: r.details, skills: r.skills, color: r.color, video: r.video, photos: r.photos }));
-  if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, color: r.color, link: r.link, featured: r.featured }));
-  if (photos && photos.length) D.photos = photos.map(r => ({ file: r.file, caption: r.caption, tag: r.tag, color: r.color }));
+  if (jobs && jobs.length) D.jobs = jobs.map(r => ({ org: r.org, orgDetails: r.orgdetails, show: r.show, title: r.title, dates: r.dates, summary: r.summary, details: r.details, skills: r.skills, color: r.color, video: r.video, photos: r.photos, logo: r.logo }));
+  if (shows && shows.length) D.shows = shows.map(r => ({ show: r.show, logo: r.logo, color: r.color, about: r.about }));
+  if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, type: r.type, date: words(r.date), color: r.color, link: r.link, thumb: r.thumbnail || r.thumb, featured: r.featured }));
+  if (photos && photos.length) D.photos = photos.map(r => ({ file: r.file, caption: r.caption, tag: r.tag, color: r.color, slideshow: r.slideshow }));
 }
 
 $("#yr").textContent = new Date().getFullYear();
