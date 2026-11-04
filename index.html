@@ -1113,8 +1113,22 @@ const COLORS = ["neon", "electric", "gold", "mint", "pink", "purple"];
 const col = (c, i) => COLORS.includes(String(c || "").trim().toLowerCase()) ? String(c).trim().toLowerCase() : COLORS[(i || 0) % COLORS.length];
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // lite mode: turned on automatically for slow devices (see "speed check" below), or by adding ?lite to the address
+const FORCE_FULL = /[?&]full\b/.test(location.search);
 let LITE = /[?&]lite\b/.test(location.search);
-try { if (sessionStorage.getItem("bm-lite") === "1" && !/[?&]full\b/.test(location.search)) LITE = true; } catch (e) {}
+try { if (sessionStorage.getItem("bm-lite") === "1" && !FORCE_FULL) LITE = true; } catch (e) {}
+// if the browser is drawing in software (graphics acceleration off), go lite right away.
+// Chrome reports a software renderer such as "SwiftShader" when that happens.
+function softwareRendering(){
+  try {
+    const gl = document.createElement("canvas").getContext("webgl");
+    if (!gl) return true;
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+    const lose = gl.getExtension("WEBGL_lose_context"); if (lose) lose.loseContext();
+    return /swiftshader|basic render|llvmpipe|softpipe|software/i.test(name);
+  } catch (e) { return false; }
+}
+if (!LITE && !FORCE_FULL && softwareRendering()) LITE = true;
 if (LITE) document.documentElement.classList.add("lite");
 const FINE = matchMedia("(pointer: fine)").matches;
 // media/ photo names, full links, and Google Drive share links all work
@@ -1518,7 +1532,7 @@ function goLite(){
   try { sessionStorage.setItem("bm-lite", "1"); } catch (e) {}
 }
 function speedCheck(){
-  if (LITE || REDUCED || /[?&]full\b/.test(location.search) || document.visibilityState !== "visible") return;
+  if (LITE || REDUCED || FORCE_FULL || document.visibilityState !== "visible") return;
   let frames = 0, slow = 0, start = 0, last = 0, cancelled = false;
   const stop = () => { cancelled = true; };
   document.addEventListener("visibilitychange", stop, { once: true });
@@ -1534,6 +1548,18 @@ function speedCheck(){
   });
 }
 setTimeout(speedCheck, 4500);
+// second check: watch for stutter while scrolling (where lag is felt most)
+let scrollFrames = 0, scrollSlow = 0, scrollLast = 0, watching = false;
+addEventListener("scroll", () => {
+  if (LITE || REDUCED || FORCE_FULL || watching) return;
+  watching = true; scrollLast = 0;
+  requestAnimationFrame(function f(t){
+    if (scrollLast) { scrollFrames++; if (t - scrollLast > 34) scrollSlow++; }
+    scrollLast = t;
+    if (scrollFrames >= 120) { if (scrollSlow > scrollFrames * 0.25) goLite(); scrollFrames = scrollSlow = 0; }
+    if (root.classList.contains("is-scrolling") && !LITE) requestAnimationFrame(f); else watching = false;
+  });
+}, { passive: true });
 
 if (FINE && !REDUCED && !LITE) {
   document.body.classList.add("has-cursor");
