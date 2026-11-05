@@ -1868,7 +1868,18 @@ function ytId(url){ const m = url && url.match(/(?:youtu\.be\/|v=|embed\/|shorts
 function embedUrl(url){
   if (ytId(url)) return "https://www.youtube-nocookie.com/embed/" + ytId(url) + "?rel=0";
   const m = url && url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  return m ? "https://player.vimeo.com/video/" + m[1] : "";
+  if (!m) return "";
+  // unlisted videos carry a private code (vimeo.com/123/abc or ?h=abc) the player needs
+  const h = url.match(/vimeo\.com\/(?:video\/)?\d+\/(\w+)/) || url.match(/[?&]h=(\w+)/);
+  return "https://player.vimeo.com/video/" + m[1] + (h ? "?h=" + h[1] : "");
+}
+// Vimeo has no fixed thumbnail address like YouTube, so ask Vimeo for it once and remember it
+const vimeoThumbs = {};
+function vimeoThumb(url){
+  const src = embedUrl(url);
+  if (!/vimeo/.test(src)) return Promise.resolve("");
+  return vimeoThumbs[src] = vimeoThumbs[src] || fetch("https://vimeo.com/api/oembed.json?width=1280&url=" + encodeURIComponent(src))
+    .then(r => r.ok ? r.json() : {}).then(j => j.thumbnail_url || "").catch(() => "");
 }
 // what kind of work a video is: decides which Reel tab it sits in
 const TABS = [["package", "Packages"], ["documentary", "Documentaries"], ["produced", "Produced"]];
@@ -1898,7 +1909,7 @@ function renderReel(){
   if (id && !(featured && featured.thumb)) {
     const hq = () => { img.onerror = null; img.src = "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg"; };
     img.onerror = hq; img.onload = () => { if (img.naturalWidth <= 120) hq(); };
-  }
+  } else if (featured && !featured.thumb) vimeoThumb(featured.link).then(t => { if (t && img.isConnected) img.src = t; });
   $("#reelPlay").onclick = () => {
     if (!src) return;
     $("#reelFeature").innerHTML = '<iframe src="' + src + (src.includes("?") ? "&" : "?") + 'autoplay=1" title="' + esc(featured.title) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
@@ -1946,12 +1957,18 @@ function renderLibrary(){
     html = '<div class="video-grid">' + items.map((v, i) => {
       const id = ytId(v.link), thumb = v.thumb ? imgSrc(v.thumb) : id ? "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg" : "";
       return open(v, "vcard tilt in lib-anim c-" + vColor(v, i), i,
-        '<div class="vthumb">' + (thumb ? '<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '<span class="wm">' + esc(v.show || label) + '</span>') +
+        '<div class="vthumb"' + (thumb ? '' : ' data-vimeo="' + esc(v.link || "") + '"') + '>' + (thumb ?'<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '<span class="wm">' + esc(v.show || label) + '</span>') +
         (v.link ? '<div class="p"><span>' + ICON.play + '</span></div>' : '') + (v.show ? logoBadge(v.show, v.color) : '') + '</div>' +
         '<div class="vbody"><h3>' + esc(v.title) + '</h3><p>' + (meta(v) || label) + (v.link ? '' : ' · Coming soon') + '</p></div>', "PLAY");
     }).join("") + '</div>';
   }
   $("#libBody").innerHTML = html;
+  // Vimeo cards start on the show-name placeholder, then swap in the real thumbnail once Vimeo answers
+  $$("#libBody [data-vimeo]").forEach(el => vimeoThumb(el.dataset.vimeo).then(t => {
+    if (!t) return;
+    const wm = $(".wm", el); if (wm) wm.remove();
+    el.insertAdjacentHTML("afterbegin", '<img src="' + esc(t) + '" alt="" loading="lazy">');
+  }));
   $$("#libTabs .tab").forEach(b => b.onclick = () => { lib.tab = b.dataset.tab; renderLibrary(); });
   $$("[data-show-f]").forEach(b => b.onclick = () => setShow(b.dataset.showF));
   $$("#libBody [data-li]").forEach(b => b.onclick = () => openVideo(library[+b.dataset.li]));
