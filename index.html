@@ -442,6 +442,9 @@ section{padding:110px 0;position:relative}
 .tab .n{margin-left:7px;font-size:12px;opacity:.65}
 .filter.on .dot{background:#03122B;box-shadow:none}
 .filter .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c);margin-right:8px;vertical-align:1px}
+.filter:has(.flogo){display:inline-flex;align-items:center;padding-left:6px}
+.filter .flogo{width:24px;height:24px;border-radius:50%;object-fit:cover;margin:-4px 8px -4px 0;flex:none;box-shadow:0 0 0 1.5px color-mix(in srgb,var(--c) 70%,transparent)}
+.filter.on .flogo{box-shadow:0 0 0 1.5px #03122B}
 .lib-anim{animation:pageIn .55s var(--ease) both;animation-delay:var(--d,0s)}
 .lib-empty{padding:46px 24px;text-align:center;color:var(--muted)}
 .lib-empty b{display:block;font-family:var(--display);font-size:22px;text-transform:uppercase;color:var(--text);margin-bottom:4px}
@@ -485,7 +488,9 @@ a.vcard{display:block;text-decoration:none}
 /* a show's logo: the image from the Shows tab, or its initials until a logo is added */
 .logo-badge{--c:var(--neon);position:relative;width:56px;height:56px;border-radius:14px;flex:none;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--c) 42%,#0A1733),#040A18 78%);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);color:#fff;font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.04em;line-height:1;text-transform:uppercase;box-shadow:0 0 20px color-mix(in srgb,var(--c) 28%,transparent)}
 .logo-badge.long{font-size:12px;letter-spacing:.06em}
-.logo-badge img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:12%;background:#040A18}
+/* logos are square images that fill the badge edge to edge; a soft inner ring keeps every shape crisp against the page */
+.logo-badge img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#040A18}
+.logo-badge:has(img)::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none}
 .show-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:60px}
 .show-pill{display:flex;align-items:center;gap:12px;padding:8px 18px 8px 8px;border-radius:999px;font:inherit;color:var(--text);cursor:pointer;transition:transform .35s var(--ease),border-color .3s,box-shadow .3s}
 .show-pill:hover{transform:translateY(-3px);border-color:var(--c);box-shadow:0 0 24px color-mix(in srgb,var(--c) 30%,transparent)}
@@ -1166,9 +1171,9 @@ const DEFAULTS = {
   // a full image link, or a Google Drive share link. Until a logo is added, the show's initials stand in.
   // These are used on Career and as the show filters on Reel. The sheet's Shows tab replaces them.
   shows: [
-    { show: "NewsBreak",  logo: "", color: "neon",     about: "Executive Producer" },
-    { show: "NewsVision", logo: "", color: "gold",     about: "Reporter" },
-    { show: "Pulse",      logo: "", color: "pink",     about: "Reporter" },
+    { show: "NewsBreak",  logo: "newsbreak.jpg",  color: "neon",     about: "Executive Producer" },
+    { show: "NewsVision", logo: "newsvision.jpg", color: "gold",     about: "Reporter" },
+    { show: "Pulse",      logo: "pulse.jpg",      color: "pink",     about: "Reporter" },
     { show: "PrimeTime",  logo: "", color: "purple",   about: "Audio operator" },
     { show: "The Culture",logo: "", color: "mint",     about: "Audio operator" },
     { show: "UniMiami",   logo: "", color: "electric", about: "Audio operator" }
@@ -1803,6 +1808,9 @@ const lighter = new IntersectionObserver(entries => entries.forEach(e => {
 
 // ---------- show logos ----------
 const showInfo = name => D.shows.find(s => s.show.toLowerCase() === String(name || "").trim().toLowerCase());
+// workplaces that aren't a show: their badge uses this logo unless the job row has its own
+const ORG_LOGOS = { umtv: "umtv.png", target: "target.png" };
+const orgLogo = org => ORG_LOGOS[String(org || "").trim().toLowerCase()] || "";
 // stand-in until a logo is added: short names as-is, longer ones as their capitals (NewsBreak → NB)
 function initials(name){
   name = String(name || "").trim();
@@ -1843,7 +1851,8 @@ function renderJobs(){
     return '<div class="event c-' + c + '">' +
       '<div class="ev-when reveal"><b>' + esc(start) + '</b>' + (start !== j.dates ? '<small>' + esc(j.dates) + '</small>' : '') + '</div>' +
       // a role that isn't on a listed show wears its organization's badge instead (Target, UMTV)
-      logoBadge(showInfo(j.show) || j.logo || !org ? j.show : org, c, j.logo) +
+      // logos in the media folder win: they always load, Drive links only do when the file is shared publicly
+      logoBadge(showInfo(j.show) || j.logo || !org ? j.show : org, c, (showInfo(j.show) || {}).logo || orgLogo(org) || j.logo) +
       '<div class="ev-card card reveal right"><div class="ev-show">' + esc(j.show) + (org && org !== j.show ? ' <span>· ' + esc(org) + '</span>' : '') + '</div>' +
       '<h3>' + esc(j.title) + '</h3>' + (j.summary ? '<p>' + esc(j.summary) + '</p>' : '') +
       (items.length ? '<ul>' + items.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : '') +
@@ -1914,7 +1923,7 @@ function renderLibrary(){
     '<span class="n">' + library.filter(v => vType(v) === k && inShow(v)).length + '</span></button>').join("");
   $("#showFilters").innerHTML = shows.length > 1 ? ['All'].concat(shows).map((s, i) =>
     '<button class="filter c-' + (s === "All" ? "neon" : col((showInfo(s) || {}).color, i)) + (lib.show === s ? ' on' : '') + '" data-show-f="' + esc(s) + '">' +
-    (s === "All" ? "All shows" : '<span class="dot"></span>' + esc(s)) + '</button>').join("") : "";
+    (s === "All" ? "All shows" : ((showInfo(s) || {}).logo ? '<img class="flogo" src="' + esc(imgSrc(showInfo(s).logo)) + '" alt="" loading="lazy">' : '<span class="dot"></span>') + esc(s)) + '</button>').join("") : "";
   const label = TABS.find(t => t[0] === lib.tab)[1], items = library.filter(v => vType(v) === lib.tab && inShow(v));
   // YouTube/Vimeo links play here; any other link opens in a new tab; no link yet means "coming soon"
   const open = (v, cls, i, inner, cursor) => {
@@ -1938,7 +1947,7 @@ function renderLibrary(){
       const id = ytId(v.link), thumb = v.thumb ? imgSrc(v.thumb) : id ? "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg" : "";
       return open(v, "vcard tilt in lib-anim c-" + vColor(v, i), i,
         '<div class="vthumb">' + (thumb ? '<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '<span class="wm">' + esc(v.show || label) + '</span>') +
-        (v.link ? '<div class="p"><span>' + ICON.play + '</span></div>' : '') + logoBadge(v.show, v.color) + '</div>' +
+        (v.link ? '<div class="p"><span>' + ICON.play + '</span></div>' : '') + (v.show ? logoBadge(v.show, v.color) : '') + '</div>' +
         '<div class="vbody"><h3>' + esc(v.title) + '</h3><p>' + (meta(v) || label) + (v.link ? '' : ' · Coming soon') + '</p></div>', "PLAY");
     }).join("") + '</div>';
   }
