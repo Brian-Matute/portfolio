@@ -1916,11 +1916,12 @@ function renderReel(){
   };
 }
 
-// everything else, sorted into tabs and filterable by show
+// everything else, sorted into tabs; only Packages can be filtered by show
+const packages = () => library.filter(v => vType(v) === "package");
 function libShows(){
-  const names = [];
-  D.shows.forEach(s => { if (library.some(v => v.show === s.show)) names.push(s.show); });
-  library.forEach(v => { if (v.show && !names.includes(v.show)) names.push(v.show); });
+  const names = [], pk = packages();
+  D.shows.forEach(s => { if (pk.some(v => v.show === s.show)) names.push(s.show); });
+  pk.forEach(v => { if (v.show && !names.includes(v.show)) names.push(v.show); });
   return names;
 }
 function renderLibrary(){
@@ -1928,11 +1929,11 @@ function renderLibrary(){
   library = D.videos.filter(v => v !== top && vType(v) !== "reel");
   const shows = libShows();
   if (lib.show !== "All" && !shows.includes(lib.show)) lib.show = "All";
-  const inShow = v => lib.show === "All" || v.show === lib.show;
+  const inShow = v => lib.show === "All" || vType(v) !== "package" || v.show === lib.show;
   $("#libTabs").innerHTML = TABS.map(([k, label]) =>
     '<button class="tab' + (lib.tab === k ? ' on' : '') + '" role="tab" aria-selected="' + (lib.tab === k) + '" data-tab="' + k + '">' + label +
     '<span class="n">' + library.filter(v => vType(v) === k && inShow(v)).length + '</span></button>').join("");
-  $("#showFilters").innerHTML = shows.length > 1 ? ['All'].concat(shows).map((s, i) =>
+  $("#showFilters").innerHTML = lib.tab === "package" && shows.length > 1 ?['All'].concat(shows).map((s, i) =>
     '<button class="filter c-' + (s === "All" ? "neon" : col((showInfo(s) || {}).color, i)) + (lib.show === s ? ' on' : '') + '" data-show-f="' + esc(s) + '">' +
     (s === "All" ? "All shows" : ((showInfo(s) || {}).logo ? '<img class="flogo" src="' + esc(imgSrc(showInfo(s).logo)) + '" alt="" loading="lazy">' : '<span class="dot"></span>') + esc(s)) + '</button>').join("") : "";
   const label = TABS.find(t => t[0] === lib.tab)[1], items = library.filter(v => vType(v) === lib.tab && inShow(v));
@@ -1976,8 +1977,8 @@ function renderLibrary(){
 // pick a show; if it has nothing in the open tab, jump to a tab where it does
 function setShow(name){
   lib.show = name;
-  const has = k => library.some(v => vType(v) === k && (name === "All" || v.show === name));
-  if (!has(lib.tab)) { const t = TABS.find(([k]) => has(k)); if (t) lib.tab = t[0]; }
+  // a show's work lives under Packages, the only tab with show filters
+  if (name !== "All" && packages().some(v => v.show === name)) lib.tab = "package";
   renderLibrary();
 }
 // from Career: open the Reel page's library, filtered to one show
