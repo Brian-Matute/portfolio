@@ -434,7 +434,27 @@ section{padding:110px 0;position:relative}
 .reel-poster.soon .big-play::before,.reel-poster.soon .big-play::after{display:none}
 /* the library: tabs by kind of work, filters by show */
 #library{margin-top:90px;scroll-margin-top:80px}
-.lib-bar{margin:6px 0 18px}
+.lib-bar{margin:6px 0 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+/* search: a pill that sits beside the tabs and lights up while typing */
+.lib-search{display:flex;align-items:center;flex:1 1 220px;max-width:340px;height:50px;padding:0 10px 0 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);cursor:text;transition:border-color .3s,box-shadow .3s}
+.lib-search:focus-within{border-color:var(--neon);box-shadow:0 0 18px rgba(46,197,255,.25)}
+.lib-search svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round}
+.lib-search input{flex:1;min-width:0;height:100%;padding:0 10px;border:0;background:none;outline:none;color:var(--text);font:inherit;font-size:16px}
+.lib-search input::placeholder{color:var(--muted)}
+.lib-search input::-webkit-search-cancel-button{display:none}
+.lib-search button{width:30px;height:30px;flex:none;border:0;border-radius:50%;background:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;visibility:hidden}
+.lib-search button:hover{color:var(--text);background:var(--line)}
+.lib-search.has button{visibility:visible}
+@media (max-width:700px){.lib-search{max-width:none;flex-basis:100%}}
+/* page numbers under a long list */
+.pager{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;margin-top:28px}
+.pg{min-width:42px;height:42px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.04em;cursor:pointer;transition:color .25s,border-color .25s,box-shadow .25s,background .25s}
+.pg:hover:not(:disabled){color:var(--text);border-color:var(--neon);box-shadow:0 0 14px rgba(46,197,255,.3)}
+.pg.on{background:var(--neon);border-color:var(--neon);color:#03122B;box-shadow:0 0 18px rgba(46,197,255,.45);cursor:default}
+.pg:disabled{opacity:.35;cursor:default}
+.pager .gap{color:var(--muted);padding:0 2px}
+.pg-count{width:100%;margin-top:6px;text-align:center;font-size:13px;color:var(--muted)}
+@media (max-width:520px){.pager{gap:4px}.pg{min-width:36px;height:38px;padding:0 8px;font-size:14px}.pg.nav span{display:none}}
 .tabs{display:flex;gap:4px;padding:5px;border-radius:999px;background:var(--card);border:1px solid var(--line);width:max-content;max-width:100%;overflow-x:auto;box-shadow:var(--shadow)}
 .tab{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border-radius:999px;border:0;background:none;color:var(--muted);cursor:pointer;white-space:nowrap;transition:background .3s,color .3s,box-shadow .3s}
 .tab:hover{color:var(--text)}
@@ -960,7 +980,8 @@ footer b{color:#E6F1FF}
     <div id="library">
       <span class="kicker c-pink reveal">The library</span>
       <h2 class="sec-title reveal" style="font-size:clamp(36px,5vw,64px)">Everything I've <em class="serif">worked on</em></h2>
-      <div class="lib-bar reveal"><div class="tabs" role="tablist" id="libTabs"></div></div>
+      <div class="lib-bar reveal"><div class="tabs" role="tablist" id="libTabs"></div>
+        <label class="lib-search" id="libSearchBox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="libSearch" type="search" placeholder="Search videos" autocomplete="off" aria-label="Search videos"><button type="button" id="libClear" aria-label="Clear search">×</button></label></div>
       <div class="filters reveal" id="showFilters"></div>
       <div id="libBody"></div>
     </div>
@@ -1895,7 +1916,24 @@ function vType(v){
 }
 const vColor = (v, i) => col(v.color || (showInfo(v.show) || {}).color, i);
 let featured = null, library = [];
-const lib = { tab: "package", show: "All" };
+const lib = { tab: "package", show: "All", q: "", page: 0 };
+// long tabs split into pages of this many (the rest show everything)
+const PER_PAGE = { produced: 10 };
+// Google-style page buttons: every page when there are few, otherwise first, last and the ones around this page
+function pager(pages, total, per){
+  if (pages < 2) return "";
+  const p = lib.page, nums = [];
+  for (let k = 0; k < pages; k++) {
+    if (pages <= 7 || k === 0 || k === pages - 1 || Math.abs(k - p) <= 1 || (p < 3 && k < 4) || (p > pages - 4 && k > pages - 5)) nums.push(k);
+    else if (nums[nums.length - 1] !== "…") nums.push("…");
+  }
+  return '<nav class="pager" aria-label="Pages">' +
+    '<button class="pg nav" data-pg="' + (p - 1) + '"' + (p === 0 ? ' disabled' : '') + ' aria-label="Previous page">‹<span> Prev</span></button>' +
+    nums.map(k => k === "…" ? '<span class="gap">…</span>' :
+      '<button class="pg' + (k === p ? ' on" aria-current="page"' : '"') + ' data-pg="' + k + '">' + (k + 1) + '</button>').join("") +
+    '<button class="pg nav" data-pg="' + (p + 1) + '"' + (p === pages - 1 ? ' disabled' : '') + ' aria-label="Next page"><span>Next </span>›</button>' +
+    '<p class="pg-count">' + (p * per + 1) + '–' + Math.min(total, p * per + per) + ' of ' + total + '</p></nav>';
+}
 const findFeatured = () => D.videos.find(v => yes(v.featured)) || D.videos.find(v => vType(v) === "reel") || null;
 
 // the main reel: poster + big play button; the video only loads once it's clicked
@@ -1932,14 +1970,20 @@ function renderLibrary(){
   library = D.videos.filter(v => v !== top && vType(v) !== "reel");
   const shows = libShows();
   if (lib.show !== "All" && !shows.includes(lib.show)) lib.show = "All";
-  const inShow = v => lib.show === "All" || vType(v) !== "package" || v.show === lib.show;
+  // search: every word typed has to appear in the title, show, date or role
+  const words = lib.q.toLowerCase().split(/\s+/).filter(Boolean);
+  const found = v => { const hay = [v.title, v.show, v.date, v.role].join(" ").toLowerCase(); return words.every(w => hay.includes(w)); };
+  const inShow = v => (lib.show === "All" || vType(v) !== "package" || v.show === lib.show) && found(v);
   $("#libTabs").innerHTML = TABS.map(([k, label]) =>
     '<button class="tab' + (lib.tab === k ? ' on' : '') + '" role="tab" aria-selected="' + (lib.tab === k) + '" data-tab="' + k + '">' + label +
     '<span class="n">' + library.filter(v => vType(v) === k && inShow(v)).length + '</span></button>').join("");
   $("#showFilters").innerHTML = lib.tab === "package" && shows.length > 1 ?['All'].concat(shows).map((s, i) =>
     '<button class="filter c-' + (s === "All" ? "neon" : col((showInfo(s) || {}).color, i)) + (lib.show === s ? ' on' : '') + '" data-show-f="' + esc(s) + '">' +
     (s === "All" ? "All shows" : ((showInfo(s) || {}).logo ? '<img class="flogo" src="' + esc(imgSrc(showInfo(s).logo)) + '" alt="" loading="lazy">' : '<span class="dot"></span>') + esc(s)) + '</button>').join("") : "";
-  const label = TABS.find(t => t[0] === lib.tab)[1], items = library.filter(v => vType(v) === lib.tab && inShow(v));
+  const label = TABS.find(t => t[0] === lib.tab)[1], all = library.filter(v => vType(v) === lib.tab && inShow(v));
+  const per = PER_PAGE[lib.tab] || all.length || 1, pages = Math.max(1, Math.ceil(all.length / per));
+  lib.page = Math.max(0, Math.min(lib.page, pages - 1));
+  const items = all.slice(lib.page * per, lib.page * per + per);
   // YouTube/Vimeo links play here; any other link opens in a new tab; no link yet means "coming soon"
   const open = (v, cls, i, inner, cursor) => {
     const style = ' style="--d:' + (i % 9 * 0.05) + 's"';
@@ -1951,14 +1995,20 @@ function renderLibrary(){
   // the sheet's Role column: a short note on what Brian did on this one
   const role = v => v.role ? '<span class="role"><em>My role</em>' + esc(v.role) + '</span>' : '';
   let html;
-  if (!items.length) {
-    html = '<div class="lib-empty card lib-anim"><b>' + (lib.show === "All" ? label + " coming soon" : "No " + esc(lib.show) + " " + label.toLowerCase() + " yet") + '</b>' +
+  if (!items.length && words.length) {
+    // point to the tab that does have matches, if any
+    const elsewhere = TABS.map(([k, l]) => [k, l, library.filter(v => vType(v) === k && inShow(v)).length]).filter(t => t[2]);
+    html = '<div class="lib-empty card lib-anim"><b>No matches</b>Nothing in ' + label.toLowerCase() + ' matches “' + esc(lib.q) + '”. ' +
+      elsewhere.map(([k, l, n]) => '<button class="mini-link" data-goto="' + k + '">See ' + n + ' in ' + l + ' →</button> ').join("") +
+      '<button class="mini-link" data-clear>Clear search →</button></div>';
+  } else if (!items.length) {
+    html ='<div class="lib-empty card lib-anim"><b>' + (lib.show === "All" ? label + " coming soon" : "No " + esc(lib.show) + " " + label.toLowerCase() + " yet") + '</b>' +
       (lib.show === "All" ? "Check back soon." : '<button class="mini-link" data-show-f="All">See all shows →</button>') + '</div>';
   } else if (lib.tab === "produced") {
     // produced episodes: a running list, newest at the top of the sheet
     html = '<div class="episodes">' + items.map((v, i) => open(v, "episode lib-anim c-" + vColor(v, i), i,
       logoBadge(v.show, v.color) + '<span><b>' + esc(v.title) + '</b><small>' + meta(v) + '</small>' + role(v) + '</span>' +
-      '<span class="go">' + (embedUrl(v.link) ? "Watch ▶" : v.link ? "Open ↗" : "Coming soon") + '</span>', "PLAY")).join("") + '</div>';
+      '<span class="go">' + (embedUrl(v.link) ? "Watch ▶" : v.link ? "Open ↗" : "Coming soon") + '</span>', "PLAY")).join("") + '</div>' + pager(pages, all.length, per);
   } else {
     html = '<div class="video-grid">' + items.map((v, i) => {
       const id = ytId(v.link), thumb = v.thumb ? imgSrc(v.thumb) : id ? "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg" : "";
@@ -1966,7 +2016,7 @@ function renderLibrary(){
         '<div class="vthumb"' + (thumb ? '' : ' data-vimeo="' + esc(v.link || "") + '"') + '>' + (thumb ?'<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '<span class="wm">' + esc(v.show || label) + '</span>') +
         (v.link ? '<div class="p"><span>' + ICON.play + '</span></div>' : '') + (v.show ? logoBadge(v.show, v.color) : '') + '</div>' +
         '<div class="vbody"><h3>' + esc(v.title) + '</h3><p>' + (meta(v) || label) + (v.link ? '' : ' · Coming soon') + '</p>' + role(v) + '</div>', "PLAY");
-    }).join("") + '</div>';
+    }).join("") + '</div>' + pager(pages, all.length, per);
   }
   $("#libBody").innerHTML = html;
   // Vimeo cards start on the show-name placeholder, then swap in the real thumbnail once Vimeo answers
@@ -1975,13 +2025,30 @@ function renderLibrary(){
     const wm = $(".wm", el); if (wm) wm.remove();
     el.insertAdjacentHTML("afterbegin", '<img src="' + esc(t) + '" alt="" loading="lazy">');
   }));
-  $$("#libTabs .tab").forEach(b => b.onclick = () => { lib.tab = b.dataset.tab; renderLibrary(); });
+  $$("#libTabs .tab").forEach(b => b.onclick = () => { lib.tab = b.dataset.tab; lib.page = 0; renderLibrary(); });
   $$("[data-show-f]").forEach(b => b.onclick = () => setShow(b.dataset.showF));
   $$("#libBody [data-li]").forEach(b => b.onclick = () => openVideo(library[+b.dataset.li]));
+  $$("#libBody [data-clear]").forEach(b => b.onclick = () => search(""));
+  $$("#libBody [data-goto]").forEach(b => b.onclick = () => { lib.tab = b.dataset.goto; lib.page = 0; renderLibrary(); });
+  // a new page starts at the top of the list, not wherever the buttons were
+  $$("#libBody [data-pg]").forEach(b => b.onclick = () => {
+    lib.page = +b.dataset.pg; renderLibrary();
+    const y = $("#libTabs").getBoundingClientRect().top + scrollY - 100;
+    if (y < scrollY) scrollTo({ top: y, behavior: REDUCED ? "auto" : "smooth" });
+  });
 }
+function search(q){
+  lib.q = q; lib.page = 0;
+  $("#libSearch").value = q;
+  $("#libSearchBox").classList.toggle("has", !!q);
+  renderLibrary();
+}
+$("#libSearch").addEventListener("input", e => search(e.target.value));
+$("#libSearch").addEventListener("keydown", e => { if (e.key === "Escape") search(""); });
+$("#libClear").onclick = () => { search(""); $("#libSearch").focus(); };
 // pick a show; if it has nothing in the open tab, jump to a tab where it does
 function setShow(name){
-  lib.show = name;
+  lib.show = name; lib.page = 0;
   // a show's work lives under Packages, the only tab with show filters
   if (name !== "All" && packages().some(v => v.show === name)) lib.tab = "package";
   renderLibrary();
