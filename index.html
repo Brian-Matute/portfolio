@@ -1199,9 +1199,9 @@ const DEFAULTS = {
     { show: "NewsBreak",  logo: "newsbreak.jpg",  color: "neon",     about: "Executive Producer" },
     { show: "NewsVision", logo: "newsvision.jpg", color: "gold",     about: "Reporter" },
     { show: "Pulse",      logo: "pulse.jpg",      color: "pink",     about: "Reporter" },
-    { show: "PrimeTime",  logo: "", color: "purple",   about: "Audio operator" },
-    { show: "The Culture",logo: "", color: "mint",     about: "Audio operator" },
-    { show: "UniMiami",   logo: "", color: "electric", about: "Audio operator" }
+    { show: "PrimeTime",  logo: "primetime.jpg",  color: "purple",   about: "Audio operator" },
+    { show: "The Culture",logo: "theculture.jpg", color: "mint",     about: "Audio operator" },
+    { show: "UniMiami",   logo: "unimiami.jpg",   color: "electric", about: "Audio operator" }
   ],
   // type: Reel, Package, Documentary or Produced (an episode you produced). Blank counts as Package.
   // The featured video is the big player at the top of the Reel page.
@@ -1833,9 +1833,11 @@ const lighter = new IntersectionObserver(entries => entries.forEach(e => {
 
 // ---------- show logos ----------
 const showInfo = name => D.shows.find(s => s.show.toLowerCase() === String(name || "").trim().toLowerCase());
-// workplaces that aren't a show: their badge uses this logo unless the job row has its own
-const ORG_LOGOS = { umtv: "umtv.png", target: "target.png" };
-const orgLogo = org => ORG_LOGOS[String(org || "").trim().toLowerCase()] || "";
+// logos for names that aren't in the shows list: workplaces, specials, and shows that only appear on videos
+const LOGOS = { umtv: "umtv.png", target: "target.png", "election special": "election.jpg", "umtv this morning": "umtv.png" };
+const orgLogo = org => LOGOS[String(org || "").trim().toLowerCase()] || "";
+// the logo for any show or workplace name: the shows list first, then the extras above
+const logoFor = name => (showInfo(name) || {}).logo || orgLogo(name);
 // stand-in until a logo is added: short names as-is, longer ones as their capitals (NewsBreak → NB)
 function initials(name){
   name = String(name || "").trim();
@@ -1844,7 +1846,7 @@ function initials(name){
   return caps.length >= 2 ? caps.slice(0, 3).join("") : name.slice(0, 2);
 }
 function logoBadge(name, color, logo){
-  const s = showInfo(name) || {}, src = imgSrc(logo || s.logo), txt = initials(name);
+  const s = showInfo(name) || {}, src = imgSrc(logo || logoFor(name)), txt = initials(name);
   return '<span class="logo-badge c-' + col(color || s.color) + (txt.length > 3 ? ' long' : '') + '" title="' + esc(name) + '">' + esc(txt) +
     (src ? '<img src="' + esc(src) + '" alt="' + esc(name) + ' logo" loading="lazy" onerror="this.remove()">' : '') + '</span>';
 }
@@ -1981,7 +1983,7 @@ function renderLibrary(){
     '<span class="n">' + library.filter(v => vType(v) === k && inShow(v)).length + '</span></button>').join("");
   $("#showFilters").innerHTML = lib.tab === "package" && shows.length > 1 ?['All'].concat(shows).map((s, i) =>
     '<button class="filter c-' + (s === "All" ? "neon" : col((showInfo(s) || {}).color, i)) + (lib.show === s ? ' on' : '') + '" data-show-f="' + esc(s) + '">' +
-    (s === "All" ? "All shows" : ((showInfo(s) || {}).logo ? '<img class="flogo" src="' + esc(imgSrc(showInfo(s).logo)) + '" alt="" loading="lazy">' : '<span class="dot"></span>') + esc(s)) + '</button>').join("") : "";
+    (s === "All" ? "All shows" : (logoFor(s) ? '<img class="flogo" src="' + esc(imgSrc(logoFor(s))) + '" alt="" loading="lazy">' : '<span class="dot"></span>') + esc(s)) + '</button>').join("") : "";
   const label = TABS.find(t => t[0] === lib.tab)[1], all = library.filter(v => vType(v) === lib.tab && inShow(v));
   const per = PER_PAGE[lib.tab] || all.length || 1, pages = Math.max(1, Math.ceil(all.length / per));
   lib.page = Math.max(0, Math.min(lib.page, pages - 1));
