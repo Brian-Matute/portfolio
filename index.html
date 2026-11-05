@@ -474,6 +474,9 @@ section{padding:110px 0;position:relative}
 .vbody{padding:14px 16px 18px}
 .vbody h3{font-size:17px;margin-bottom:2px}
 .vbody p{font-size:14px;color:var(--muted)}
+/* "My role" note under a video: a small tag in the show's colour, then the note */
+.role{display:block;margin-top:8px;font-size:14px;line-height:1.45;color:var(--text)}
+.role em{display:inline-block;margin-right:8px;padding:2px 7px;border-radius:5px;vertical-align:1px;font-style:normal;font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#03122B;background:color-mix(in srgb,var(--c) 85%,#fff)}
 .vcard.soon{cursor:default}
 a.vcard{display:block;text-decoration:none}
 @media (max-width:860px){.video-grid{grid-template-columns:1fr 1fr}}
@@ -1945,6 +1948,8 @@ function renderLibrary(){
     return '<div class="' + cls + ' soon"' + style + '>' + inner + '</div>';
   };
   const meta = v => [v.show, v.date].filter(Boolean).map(esc).join(" · ");
+  // the sheet's Role column: a short note on what Brian did on this one
+  const role = v => v.role ? '<span class="role"><em>My role</em>' + esc(v.role) + '</span>' : '';
   let html;
   if (!items.length) {
     html = '<div class="lib-empty card lib-anim"><b>' + (lib.show === "All" ? label + " coming soon" : "No " + esc(lib.show) + " " + label.toLowerCase() + " yet") + '</b>' +
@@ -1952,7 +1957,7 @@ function renderLibrary(){
   } else if (lib.tab === "produced") {
     // produced episodes: a running list, newest at the top of the sheet
     html = '<div class="episodes">' + items.map((v, i) => open(v, "episode lib-anim c-" + vColor(v, i), i,
-      logoBadge(v.show, v.color) + '<span><b>' + esc(v.title) + '</b><small>' + meta(v) + '</small></span>' +
+      logoBadge(v.show, v.color) + '<span><b>' + esc(v.title) + '</b><small>' + meta(v) + '</small>' + role(v) + '</span>' +
       '<span class="go">' + (embedUrl(v.link) ? "Watch ▶" : v.link ? "Open ↗" : "Coming soon") + '</span>', "PLAY")).join("") + '</div>';
   } else {
     html = '<div class="video-grid">' + items.map((v, i) => {
@@ -1960,7 +1965,7 @@ function renderLibrary(){
       return open(v, "vcard tilt in lib-anim c-" + vColor(v, i), i,
         '<div class="vthumb"' + (thumb ? '' : ' data-vimeo="' + esc(v.link || "") + '"') + '>' + (thumb ?'<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '<span class="wm">' + esc(v.show || label) + '</span>') +
         (v.link ? '<div class="p"><span>' + ICON.play + '</span></div>' : '') + (v.show ? logoBadge(v.show, v.color) : '') + '</div>' +
-        '<div class="vbody"><h3>' + esc(v.title) + '</h3><p>' + (meta(v) || label) + (v.link ? '' : ' · Coming soon') + '</p></div>', "PLAY");
+        '<div class="vbody"><h3>' + esc(v.title) + '</h3><p>' + (meta(v) || label) + (v.link ? '' : ' · Coming soon') + '</p>' + role(v) + '</div>', "PLAY");
     }).join("") + '</div>';
   }
   $("#libBody").innerHTML = html;
@@ -2155,7 +2160,7 @@ function applySheet([settings, headlines, career, jobs, videos, photos, shows]){
   if (career && career.length) D.timeline = career.map(r => ({ date: r.date, when: words(r.when), title: r.title, text: r.text, icon: r.icon, color: r.color, burst: r.confetti }));
   if (jobs && jobs.length) D.jobs = jobs.map(r => ({ org: r.org, orgDetails: r.orgdetails, show: r.show, title: r.title, dates: r.dates, summary: r.summary, details: r.details, skills: r.skills, color: r.color, video: r.video, photos: r.photos, logo: r.logo }));
   if (shows && shows.length) D.shows = shows.map(r => ({ show: r.show, logo: r.logo, color: r.color, about: r.about }));
-  if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, type: r.type, date: words(r.date), color: r.color, link: r.link, thumb: r.thumbnail || r.thumb, featured: r.featured }));
+  if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, type: r.type, date: words(r.date), color: r.color, link: r.link, thumb: r.thumbnail || r.thumb, featured: r.featured, role: r.role || r.myrole || r.involvement }));
   if (photos && photos.length) D.photos = photos.map(r => ({ file: r.file, caption: r.caption, tag: r.tag, color: r.color, slideshow: r.slideshow }));
 }
 
