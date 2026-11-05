@@ -1927,12 +1927,13 @@ function pager(pages, total, per){
     if (pages <= 7 || k === 0 || k === pages - 1 || Math.abs(k - p) <= 1 || (p < 3 && k < 4) || (p > pages - 4 && k > pages - 5)) nums.push(k);
     else if (nums[nums.length - 1] !== "…") nums.push("…");
   }
-  return '<nav class="pager" aria-label="Pages">' +
+  // a div, not a <nav>: the site header's styles pin every nav to the screen
+  return '<div class="pager" role="navigation" aria-label="Pages">' +
     '<button class="pg nav" data-pg="' + (p - 1) + '"' + (p === 0 ? ' disabled' : '') + ' aria-label="Previous page">‹<span> Prev</span></button>' +
     nums.map(k => k === "…" ? '<span class="gap">…</span>' :
       '<button class="pg' + (k === p ? ' on" aria-current="page"' : '"') + ' data-pg="' + k + '">' + (k + 1) + '</button>').join("") +
     '<button class="pg nav" data-pg="' + (p + 1) + '"' + (p === pages - 1 ? ' disabled' : '') + ' aria-label="Next page"><span>Next </span>›</button>' +
-    '<p class="pg-count">' + (p * per + 1) + '–' + Math.min(total, p * per + per) + ' of ' + total + '</p></nav>';
+    '<p class="pg-count">' + (p * per + 1) + '–' + Math.min(total, p * per + per) + ' of ' + total + '</p></div>';
 }
 const findFeatured = () => D.videos.find(v => yes(v.featured)) || D.videos.find(v => vType(v) === "reel") || null;
 
