@@ -14,8 +14,9 @@
 <style>
 /* ============ COLORS (same family as the BAM Fantasy site) ============ */
 :root{
-  --neon:#2EC5FF; --electric:#3D7BFF; --gold:#FFD166; --mint:#4DF0B0; --pink:#FF6B8A; --purple:#B57BFF;
-  --bg:#EEF4FF; --bg2:#E3ECFB; --card:#FFFFFF; --text:#0A1733; --muted:#4A5F86; --line:#CFDDF3;
+  /* navy + baby blue, with soft reddish-orange accents (the old names stay so every card keeps its slot) */
+  --neon:#2EC5FF; --electric:#3D7BFF; --gold:#FF9466; --mint:#8AD8FF; --pink:#FF6F4E; --purple:#6FA0FF;
+  --bg:#FFFFFF; --bg2:#F3F7FC; --card:#FFFFFF; --text:#0A1733; --muted:#4A5F86; --line:#DCE6F3;
   --accent:#0A8FD8; --on-accent:#03122B;
   --shadow:0 10px 30px rgba(10,23,51,.08); --shadow-hover:0 18px 44px rgba(10,23,51,.16);
   --display:"Chakra Petch","Arial Narrow",sans-serif; --serif:"Instrument Serif",Georgia,serif;
@@ -44,17 +45,26 @@ a{color:inherit}
 em.serif,.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-transform:none;letter-spacing:0}
 
 /* film grain + drifting color orbs behind everything */
-.bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(700px 600px at 0% 18%,rgba(46,197,255,.09),transparent 70%),radial-gradient(700px 600px at 100% 72%,rgba(181,123,255,.08),transparent 70%)}
+.bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(700px 600px at 0% 18%,rgba(46,197,255,.09),transparent 70%),radial-gradient(700px 600px at 100% 72%,rgba(255,111,78,.06),transparent 70%)}
 /* specks of light rising forever, streams of light drifting up, and a glow breathing on the horizon */
 .mote-layer{position:absolute;left:0;top:0;width:2px;height:2px;border-radius:50%;animation:moteRise var(--t,90s) linear infinite;will-change:transform}
 .mote-layer::after{content:"";position:absolute;left:0;top:var(--h);width:2px;height:2px;border-radius:50%;box-shadow:inherit}
-.strand{position:absolute;bottom:-60vh;width:2px;height:52vh;border-radius:2px;background:linear-gradient(transparent,rgba(46,197,255,.5) 40%,rgba(191,233,255,.85) 60%,transparent);opacity:0;animation:strand var(--t,12s) var(--d,0s) linear infinite;will-change:transform,opacity}
+/* shooting stars: a glowing head with a tapered tail, streaking across now and then (quiet most of the time) */
+.strand{--rgb:150,220,255;position:absolute;top:var(--y,20%);left:var(--x,50%);width:var(--len,200px);height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,rgba(var(--rgb),.12) 35%,rgba(var(--rgb),.55) 80%,rgba(255,255,255,.95));
+  transform-origin:100% 50%;opacity:0;animation:shoot var(--t,12s) var(--d,0s) cubic-bezier(.25,.6,.35,1) infinite;will-change:transform,opacity}
+.strand::after{content:"";position:absolute;right:-2px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;background:#fff;
+  box-shadow:0 0 6px 2px rgba(var(--rgb),.9),0 0 18px 5px rgba(var(--rgb),.35)}
+.strand.warm{--rgb:255,160,120}
 .star-layer{position:absolute;left:0;top:0;width:2px;height:2px;border-radius:50%}
 .star-layer.tw{animation:twinkleField 3.6s ease-in-out infinite alternate}
-.strand{box-shadow:0 0 8px rgba(46,197,255,.55)}
 [data-mode="light"] .star-layer{opacity:.45}
 .horizon{position:absolute;left:-20%;right:-20%;bottom:-38vh;height:70vh;background:radial-gradient(50% 50% at 50% 50%,rgba(46,197,255,.2),rgba(61,123,255,.08) 45%,transparent 72%);animation:horizon 10s ease-in-out infinite}
-[data-mode="light"] .mote-layer,[data-mode="light"] .strand{opacity:.55}
+[data-mode="light"] .mote-layer{opacity:.55}
+/* on white, a white head would vanish: light mode's shooting stars are drawn in the site blue */
+[data-mode="light"] .strand{--rgb:10,143,216}
+[data-mode="light"] .strand.warm{--rgb:255,111,78}
+[data-mode="light"] .strand::after{background:rgb(var(--rgb))}
 [data-mode="light"] .horizon{opacity:.5}
 .motes{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
 .motes .mote-layer{opacity:.85}
@@ -160,7 +170,9 @@ nav.scrolled .icon-btn{border-color:var(--line);color:var(--text);background:tra
 .hero-media{position:absolute;inset:0;overflow:hidden;background:#040A18}
 /* each photo arrives from a different starting point (set in the script: far away, below, left, right), using only movement + fade so it stays smooth */
 .slide{position:absolute;inset:-2%;opacity:0;transform:translate3d(var(--fx,0),var(--fy,0),0) scale(var(--s0,1.14));transition:opacity 1.6s ease,transform 3.6s cubic-bezier(.16,.7,.25,1)}
-.slide.on,.slide.off{will-change:transform,opacity}
+/* only flagged as moving while it moves: Chrome on computers keeps a flagged layer at the size it was first drawn,
+   so a photo that zoomed in would stay slightly soft. Once it settles, it's redrawn sharp */
+.slide.moving{will-change:transform,opacity}
 /* photos with the subject in the middle slide over to the right on wide screens, fading in from the left, so the name doesn't cover the face */
 @media (min-width:761px){
   .slide.shift{left:var(--shift)}
@@ -664,7 +676,13 @@ footer{background:#020713;color:#8EA6CC;padding:60px 0 34px;text-align:center;fo
 footer b{color:#E6F1FF}
 .foot-lockup{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:22px}
 .foot-lockup .sig{width:190px}
-.foot-lockup .rule{width:240px;height:2px;background:linear-gradient(90deg,transparent,var(--neon),var(--purple),transparent)}
+.foot-lockup .rule{width:240px;height:2px;background:linear-gradient(90deg,transparent,var(--neon),var(--pink),transparent)}
+/* light mode: the footer and the gallery's photo strip go white like the rest of the page */
+[data-mode="light"] footer,[data-mode="light"] .strip{background:var(--bg2);border-color:var(--line)}
+[data-mode="light"] footer{color:var(--muted)}
+[data-mode="light"] footer b,[data-mode="light"] .foot-lockup .name{color:var(--text)}
+[data-mode="light"] .foot-lockup .tag{color:var(--muted)}
+[data-mode="light"] .foot-links a{color:var(--accent)}
 .foot-lockup .name{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.24em;color:#E6F1FF}
 .foot-lockup .tag{font-family:var(--display);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:#8EA6CC}
 
@@ -747,7 +765,13 @@ footer b{color:#E6F1FF}
 @keyframes kenburns{from{transform:scale(1.04) translate3d(0,0,0)}to{transform:scale(1.14) translate3d(-2%,-1.5%,0)}}
 @keyframes twinkleField{from{opacity:.2}to{opacity:1}}
 @keyframes moteRise{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,calc(var(--h) * -1),0)}}
-@keyframes strand{0%{transform:translate3d(0,0,0);opacity:0}15%{opacity:.75}80%{opacity:.45}100%{transform:translate3d(var(--sway,0px),-175vh,0);opacity:0}}
+/* streak for the first ~12% of the cycle (tail stretching out as it flies), then rest unseen until the next pass */
+@keyframes shoot{
+  0%{opacity:0;transform:rotate(var(--a,25deg)) translate3d(0,0,0) scaleX(.2)}
+  3%{opacity:1}
+  9%{opacity:.9}
+  13%{opacity:0;transform:rotate(var(--a,25deg)) translate3d(var(--dist,420px),0,0) scaleX(1)}
+  100%{opacity:0;transform:rotate(var(--a,25deg)) translate3d(var(--dist,420px),0,0) scaleX(1)}}
 @keyframes horizon{0%,100%{opacity:.55;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.08)}}
 @keyframes beam{0%{opacity:0;transform:translateX(-60%) skewX(-18deg)}15%{opacity:1}100%{opacity:0;transform:translateX(560%) skewX(-18deg)}}
 @keyframes bloom{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
@@ -805,7 +829,6 @@ footer b{color:#E6F1FF}
 <div id="splash" aria-hidden="true">
   <div class="curtain t"></div><div class="curtain b"></div>
   <div class="stage" id="splashStage"></div>
-  <div class="count"><b id="splashCount">00</b>LOADING</div>
   <div class="slate">BRIAN MATUTE<br>TAKE 01</div>
 </div>
 <div id="progress"></div>
@@ -845,7 +868,7 @@ footer b{color:#E6F1FF}
   <div class="hero-shade"></div>
   <div class="motes" aria-hidden="true"><i></i><i></i></div>
   <div class="hud hud-l"><span class="live-bug"><i></i>LIVE</span><span class="clock" id="clock">MIAMI --:--:--</span></div>
-  <div class="hud hud-r"><span class="rec"><i></i>REC</span><span class="tc" id="tc">00:00:00:00</span></div>
+  <div class="hud hud-r"><span class="rec"><i></i>REC</span></div>
   <div class="wrap hero-in">
     <h1 class="hero-name" id="heroName"><span class="line">Brian</span><span class="line accent">Matute</span></h1>
     <div class="hero-sig" id="heroSig"></div>
@@ -856,7 +879,7 @@ footer b{color:#E6F1FF}
       <a href="#/resume" class="btn btn-ghost magnetic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>View resume</span></a>
     </div>
   </div>
-  <div class="lower-third"><div class="lt-name">BRIAN MATUTE</div><div class="lt-sub">Reporter · Producer · Anchor</div></div>
+  <div class="lower-third"><div class="lt-name">BRIAN MATUTE</div><div class="lt-sub">Reporter. Producer. Storyteller.</div></div>
   <div class="slide-ui"><div class="dots" id="slideDots"></div></div>
   <div class="ticker" aria-label="Headlines"><div class="ticker-tag">HEADLINES</div><div class="ticker-track" id="tickerTrack"></div></div>
 </header>
@@ -874,7 +897,7 @@ footer b{color:#E6F1FF}
         </div>
       </div>
       <div class="bio-text">
-        <span class="kicker c-neon reveal"><span class="num">01</span> Bio</span>
+        <span class="kicker c-neon reveal">Bio</span>
         <h2 class="sec-title split reveal">Meet <em class="serif">Brian</em></h2>
         <p id="bio1" class="reveal">I'm a bilingual broadcast journalist based in Miami and a 2026 graduate of the University of Miami, where I earned a B.S. in Communication with a major in Broadcast Journalism.</p>
         <p class="muted reveal" id="bio2">I spent my college years at UMTV, the university's student TV station. I started as an anchor and reporter on NewsBreak, then became Associate Producer and finally Executive Producer. I also reported live for the award-winning newscast NewsVision, covered entertainment and lifestyle for Pulse, and ran the audio board for live broadcasts. In May 2026 I received the Andrew Barton Award for Outstanding Commitment to UMTV.</p>
@@ -894,12 +917,11 @@ footer b{color:#E6F1FF}
 <!-- ============ SKILLS ============ -->
 <section id="skills">
   <div class="wrap">
-    <span class="kicker c-mint reveal"><span class="num">02</span> Skills</span>
+    <span class="kicker c-mint reveal">Skills</span>
     <h2 class="sec-title split reveal">What I <em class="serif">bring</em></h2>
     <p class="sec-sub reveal">Click a skill area to see more.</p>
     <div class="skills">
       <div class="skill card c-neon reveal tilt">
-        <span class="big">01</span>
         <button class="skill-head" aria-expanded="false">
           <span class="skill-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></svg></span>
           <div><h3>On-Air</h3><p>Anchoring, reporting, interviewing</p></div>
@@ -911,7 +933,6 @@ footer b{color:#E6F1FF}
         </div></div></div>
       </div>
       <div class="skill card c-gold reveal tilt" style="--d:.1s">
-        <span class="big">02</span>
         <button class="skill-head" aria-expanded="false">
           <span class="skill-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H4zM8 20h8M12 16v4"/><path d="M10 8l4 2-4 2z" fill="currentColor"/></svg></span>
           <div><h3>Producing</h3><p>Live broadcast production</p></div>
@@ -923,7 +944,6 @@ footer b{color:#E6F1FF}
         </div></div></div>
       </div>
       <div class="skill card c-pink reveal tilt">
-        <span class="big">03</span>
         <button class="skill-head" aria-expanded="false">
           <span class="skill-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
           <div><h3>Writing</h3><p>Storytelling, AP style, ENPS</p></div>
@@ -935,7 +955,6 @@ footer b{color:#E6F1FF}
         </div></div></div>
       </div>
       <div class="skill card c-purple reveal tilt" style="--d:.1s">
-        <span class="big">04</span>
         <button class="skill-head" aria-expanded="false">
           <span class="skill-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span>
           <div><h3>Editing &amp; Tech</h3><p>Premiere Pro, Wheatstone audio</p></div>
@@ -950,19 +969,10 @@ footer b{color:#E6F1FF}
   </div>
 </section>
 
-<!-- ============ EXPLORE: links to every area of the site ============ -->
-<section id="explore">
-  <div class="wrap">
-    <span class="kicker c-electric reveal"><span class="num">03</span> Explore</span>
-    <h2 class="sec-title split reveal">Take a <em class="serif">look around</em></h2>
-    <div class="portals" id="portals"></div>
-  </div>
-</section>
-
 <!-- ============ MY TIMELINE ============ -->
 <section id="timeline">
   <div class="wrap">
-    <span class="kicker c-gold reveal"><span class="num">04</span> My timeline</span>
+    <span class="kicker c-gold reveal">My timeline</span>
     <h2 class="sec-title split reveal">My <em class="serif">timeline</em></h2>
     <p class="sec-sub reveal">From day one to right now. Keep scrolling.</p>
     <div class="tl" id="tl"><div class="tl-line"><i id="tlFill"></i></div><span class="tl-head" id="tlHead"></span><div id="tlEvents"></div></div>
@@ -974,7 +984,7 @@ footer b{color:#E6F1FF}
 <div class="page" data-page="reel" hidden>
 <section id="reel">
   <div class="wrap">
-    <span class="kicker c-pink reveal"><span class="num">03</span> On camera</span>
+    <span class="kicker c-pink reveal">On camera</span>
     <h2 class="sec-title split reveal">Reel &amp; <em class="serif">stories</em></h2>
     <p class="sec-sub reveal">My demo reel and some of my packages, live hits and segments. Click any card to watch.</p>
     <div class="monitor reveal zoom"><div class="screen" id="reelFeature"></div></div>
@@ -983,7 +993,6 @@ footer b{color:#E6F1FF}
       <h2 class="sec-title reveal" style="font-size:clamp(36px,5vw,64px)">Everything I've <em class="serif">worked on</em></h2>
       <div class="lib-bar reveal"><div class="tabs" role="tablist" id="libTabs"></div>
         <label class="lib-search" id="libSearchBox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="libSearch" type="search" placeholder="Search videos" autocomplete="off" aria-label="Search videos"><button type="button" id="libClear" aria-label="Clear search">×</button></label></div>
-      <div class="filters reveal" id="showFilters"></div>
       <div id="libBody"></div>
     </div>
   </div>
@@ -1007,7 +1016,7 @@ footer b{color:#E6F1FF}
 <div class="strip" aria-label="Photo filmstrip"><div class="track" id="stripTrack"></div></div>
 <section id="gallery">
   <div class="wrap">
-    <span class="kicker c-purple reveal"><span class="num">06</span> Behind the scenes</span>
+    <span class="kicker c-purple reveal">Behind the scenes</span>
     <h2 class="sec-title split reveal">The <em class="serif">gallery</em></h2>
     <p class="sec-sub reveal">In the studio, in the field and behind the camera. Click a photo to see it full size.</p>
     <div class="filters reveal" id="filters"></div>
@@ -1021,7 +1030,7 @@ footer b{color:#E6F1FF}
 <div class="page" data-page="resume" hidden>
 <section id="resume">
   <div class="wrap">
-    <span class="kicker c-neon reveal"><span class="num">07</span> Resume</span>
+    <span class="kicker c-neon reveal">Resume</span>
     <h2 class="sec-title split reveal">On <em class="serif">paper</em></h2>
     <p class="sec-sub reveal">Read it here, open it full screen, or download a copy.</p>
     <div class="resume">
@@ -1075,7 +1084,7 @@ footer b{color:#E6F1FF}
 <div class="page" data-page="contact" hidden>
 <section id="contact">
   <div class="wrap">
-    <span class="kicker c-pink reveal"><span class="num">08</span> Contact</span>
+    <span class="kicker c-pink reveal">Contact</span>
     <h2 class="cta" id="cta">Let's make <em class="serif">news.</em></h2>
     <div class="contact">
       <div class="reveal left">
@@ -1344,7 +1353,7 @@ function moteLayer(count, w, h, sizes, colors, t, cls){
 }
 function buildLight(){
   const w = innerWidth, h = Math.max(innerHeight, 900), small = w < 700, moving = !REDUCED && !LITE;
-  const bg = $(".bg-fx"), colors = ["rgba(191,233,255,.9)", "rgba(46,197,255,.85)", "rgba(61,123,255,.8)", "rgba(181,123,255,.7)"];
+  const bg = $(".bg-fx"), colors = ["rgba(191,233,255,.9)", "rgba(46,197,255,.85)", "rgba(61,123,255,.8)", "rgba(255,150,110,.65)"];
   // always: horizon glow, a still starfield and a few twinkling stars (cheap even on slow devices)
   bg.innerHTML = '<div class="horizon"></div>';
   bg.appendChild(moteLayer(small ? 60 : 130, w, innerHeight, [.8, 1, 1.4], colors, 0, "star-layer"));
@@ -1353,13 +1362,19 @@ function buildLight(){
   // full mode only: specks of light rising at three speeds.
   // Each layer is a screen-sized image held in graphics memory, so phones get one layer with all three sizes mixed in.
   if (moving) (small ? [[30, [1, 1, 2, 3], 80]] : [[40, [1], 110], [20, [2], 62], [8, [3], 40]]).forEach(([n, s, t]) => bg.appendChild(moteLayer(n, w, h, s, colors, t)));
-  for (let k = 0; k < (LITE ? 2 : small ? 3 : 6); k++) {
-    const st = document.createElement("i");
-    st.className = "strand";
-    st.style.left = (8 + Math.random() * 84).toFixed(1) + "%";
-    st.style.setProperty("--t", (10 + Math.random() * 8).toFixed(1) + "s");
-    st.style.setProperty("--d", (-Math.random() * 16).toFixed(1) + "s");
-    st.style.setProperty("--sway", ((Math.random() - .5) * 80).toFixed(0) + "px");
+  // shooting stars: each has its own spot, angle, speed and timing, so they never fire in step
+  const stars = LITE ? 2 : small ? 3 : 5;
+  for (let k = 0; k < stars; k++) {
+    const st = document.createElement("i"), r = (a, b) => a + Math.random() * (b - a);
+    st.className = "strand" + (k === 1 ? " warm" : "");
+    // spread across the width, in the upper part of the screen; most fall left to right, the odd one the other way
+    st.style.setProperty("--x", ((k + r(.1, .8)) / stars * 100).toFixed(1) + "%");
+    st.style.setProperty("--y", r(4, 48).toFixed(1) + "%");
+    st.style.setProperty("--a", (k % 3 === 2 ? r(150, 160) : r(18, 34)).toFixed(0) + "deg");
+    st.style.setProperty("--len", r(small ? 110 : 150, small ? 170 : 260).toFixed(0) + "px");
+    st.style.setProperty("--dist", r(small ? 220 : 360, small ? 340 : 560).toFixed(0) + "px");
+    st.style.setProperty("--t", r(9, 17).toFixed(1) + "s");
+    st.style.setProperty("--d", (-r(0, 17)).toFixed(1) + "s");
     bg.appendChild(st);
   }
   // a few brighter specks rising over the opening photos
@@ -1390,16 +1405,10 @@ function startHero(){
   writeSig($("#heroSig .sig"), 1700, 900);
   startSlides();
 }
-// clock + timecode only tick while they're on screen
+// the Miami clock only ticks while it's on screen
 const clockFmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-const t0 = performance.now(), visible = new Set();
-setInterval(() => {
-  if (!visible.has("hero") && !visible.has("reel")) return;
-  const f = Math.floor((performance.now() - t0) / (1000 / 30)), pad = n => String(n).padStart(2, "0");
-  const tc = pad(Math.floor(f / 108000)) + ":" + pad(Math.floor(f / 1800) % 60) + ":" + pad(Math.floor(f / 30) % 60) + ":" + pad(f % 30);
-  if (visible.has("hero")) { $("#clock").textContent = "MIAMI " + clockFmt.format(new Date()); $("#tc").textContent = tc; }
-  if (visible.has("reel")) $$(".osd .tc").forEach(el => el.textContent = tc);
-}, 100);
+const visible = new Set();
+setInterval(() => { if (visible.has("hero")) $("#clock").textContent = "MIAMI " + clockFmt.format(new Date()); }, 500);
 
 // ---------- hero slideshow: photos drift into center stage and dissolve into the next ----------
 // where each photo's subject sits, so the framing looks right (desktop, then phone)
@@ -1446,14 +1455,14 @@ function showSlide(n){
   const prev = els[si], next = els[n];
   if (prev && prev !== next) {
     prev.style.setProperty("--ox", drift()); prev.style.setProperty("--oy", drift());
-    prev.classList.remove("on"); prev.classList.add("off");
-    setTimeout(() => prev.classList.remove("off"), 3300);
+    prev.classList.remove("on"); prev.classList.add("off", "moving");
+    setTimeout(() => prev.classList.remove("off", "moving"), 3300);
   }
   // each photo flows in from a different direction, settling toward the center
   next.classList.remove("off");
   // the first photo just fades up behind the intro; after that each one arrives a different way
   const fx = si >= 0 && !REDUCED ? ENTRANCES[fxN++ % ENTRANCES.length] : "";
-  const start = { far: [drift(), drift(), 1.45], below: ["0%", "14%", 1.12], left: ["-14%", "0%", 1.12], right: ["14%", "0%", 1.12] }[fx] || [drift(), drift(), 1.14];
+  const start = { far: [drift(), drift(), 1.24], below: ["0%", "14%", 1.12], left: ["-14%", "0%", 1.12], right: ["14%", "0%", 1.12] }[fx] || [drift(), drift(), 1.14];
   // jump straight to the starting point (no animation), then let it glide in
   next.style.transition = "none";
   next.style.setProperty("--fx", start[0]); next.style.setProperty("--fy", start[1]); next.style.setProperty("--s0", start[2]);
@@ -1461,7 +1470,9 @@ function showSlide(n){
   next.style.transition = "";
   next.style.setProperty("--tx", (Math.random() * 2 - 1).toFixed(2) + "%"); next.style.setProperty("--ty", (Math.random() * 2 - 1).toFixed(2) + "%");
   next.getBoundingClientRect();
-  next.classList.add("on");
+  next.classList.add("on", "moving");
+  clearTimeout(next._settle);
+  next._settle = setTimeout(() => next.classList.remove("moving"), 3800);
   if (si >= 0) { const beam = $("#beam"); beam.classList.remove("go"); beam.getBoundingClientRect(); beam.classList.add("go"); }
   si = n;
   $$("#slideDots button").forEach((b, i) => { b.className = i === n ? "now" : i < n ? "done" : ""; });
@@ -1485,7 +1496,7 @@ function scramble(el, to){
 }
 setInterval(() => { if (roles.length < 2) return; ri = (ri + 1) % roles.length; scramble($("#roleText"), roles[ri]); }, 3000);
 
-// ---------- intro: pen signature + counter, then curtains open (once per visit) ----------
+// ---------- intro: pen signature, then curtains open (once per visit) ----------
 const splash = $("#splash");
 let seen = false;
 try { seen = sessionStorage.getItem("bm-intro") === "1"; sessionStorage.setItem("bm-intro", "1"); } catch (e) {}
@@ -1500,8 +1511,6 @@ else {
   $("#splashStage").innerHTML = penSig("neon", false);
   const s = $("#splashStage .sig");
   primeSig(s); writeSig(s, 1900, 150);
-  const c0 = performance.now();
-  (function count(t){ const p = Math.min((t - c0) / 2100, 1); $("#splashCount").textContent = String(Math.round(p * 100)).padStart(2, "0"); if (p < 1) requestAnimationFrame(count); })(c0);
   setTimeout(endSplash, 2700);
   splash.onclick = endSplash;
 }
@@ -1609,11 +1618,6 @@ PAGES.forEach((p, i) => {
   up.innerHTML = '<a class="card c-' + nx.color + ' reveal" href="#/' + nx.r + '"><div><small>Up next</small><b>' + nx.title + '</b></div><span class="arrow">→</span></a><a class="home" href="#/">← Back to the welcome page</a>';
   page.append(up);
 });
-// Explore cards on the welcome page
-$("#portals").innerHTML = PAGES.map((p, i) =>
-  '<a class="portal card tilt reveal c-' + p.color + '" style="--d:' + (i % 3 * 0.08) + 's" href="#/' + p.r + '">' +
-  '<div class="top"><span class="portal-ico">' + p.icon + '</span><span class="idx">' + String(i + 1).padStart(2, "0") + '</span></div>' +
-  '<h3>' + p.title + '</h3><p>' + p.blurb + '</p><span class="go">Open <i>→</i></span></a>').join("");
 
 let page = "";
 function route(){
@@ -1803,7 +1807,7 @@ const TL_ICONS = {
   trophy: '<g class="cup"><path d="M16 5h16v11a8 8 0 0 1-16 0z"/><path d="M16 8.5H9v3a7 7 0 0 0 7 7M32 8.5h7v3a7 7 0 0 1-7 7M24 24v7M18 31h12l2 11H16z"/></g><rect class="cf c1" x="5" y="2" width="3" height="5" rx="1" fill="#FFD166" stroke="none"/><rect class="cf c2" x="40" y="4" width="3" height="5" rx="1" fill="#FF6B8A" stroke="none"/><rect class="cf c3" x="23" y="0" width="3" height="5" rx="1" fill="#4DF0B0" stroke="none"/>',
   rocket: '<g class="body"><path d="M24 3c7.5 6 9.5 15.5 7.5 25h-15C14.5 18.5 16.5 9 24 3z"/><circle cx="24" cy="16" r="3.2"/><path d="M16.5 25l-6.5 7 7.5-1.2M31.5 25l6.5 7-7.5-1.2"/><path class="flame" d="M19.5 30l4.5 12 4.5-12z" fill="#FFD166" stroke="none"/></g>'
 };
-const BURST = ["#FFD166", "#2EC5FF", "#FF6B8A", "#4DF0B0", "#B57BFF", "#3D7BFF"];
+const BURST = ["#FF9466", "#2EC5FF", "#FF6F4E", "#8AD8FF", "#BFE9FF", "#3D7BFF"];
 function ageAt(d){
   const born = D.timeline.find(t => t.icon === "star" && t.date), b = born && new Date(born.date), x = d && new Date(d);
   if (!b || !x || isNaN(x) || x <= b) return "";
@@ -1852,6 +1856,8 @@ function logoBadge(name, color, logo){
 }
 
 // ---------- career: one event per role, newest first ----------
+const JOB_FIRST = [["NewsBreak", "Executive Producer"], ["NewsVision", "Reporter"]];
+const eq = (a, b) => String(a || "").trim().toLowerCase() === b.toLowerCase();
 const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
 function startOf(dates){
   const m = String(dates || "").match(/([A-Za-z]{3})[a-z]*\.?\s+(\d{4})/);
@@ -1863,13 +1869,12 @@ function renderJobs(){
   $("#showRow").innerHTML = D.shows.map((s, i) =>
     '<button class="show-pill card c-' + col(s.color, i) + '" data-show="' + esc(s.show) + '" data-cursor="WATCH">' + logoBadge(s.show, s.color, s.logo) +
     '<span><b>' + esc(s.show) + '</b>' + (s.about ? '<small>' + esc(s.about) + '</small>' : '') + '</span></button>').join("");
-  // jobs that started the same month keep the sheet's order
-  const jobs = D.jobs.map((j, i) => ({ j, i, at: startOf(j.dates) })).sort((a, b) => b.at - a.at || a.i - b.i);
-  // the "Up next" card sits on top, above the newest job
+  // the roles listed here lead, in this order; everything else follows newest first
+  // (jobs that started the same month keep the sheet's order)
+  const lead = j => JOB_FIRST.findIndex(([show, title]) => eq(j.show, show) && eq(j.title, title));
+  const rank = j => { const n = lead(j); return n < 0 ? JOB_FIRST.length : n; };
+  const jobs = D.jobs.map((j, i) => ({ j, i, at: startOf(j.dates) })).sort((a, b) => rank(a.j) - rank(b.j) || b.at - a.at || a.i - b.i);
   $("#jobsWrap").innerHTML =
-    '<div class="event next c-neon"><div class="ev-when reveal"><b>Next</b></div><span class="logo-badge c-neon">★</span>' +
-    '<div class="ev-card card reveal right"><div class="ev-show">Up next</div><h3>Your newsroom?</h3>' +
-    '<p>Looking for my next role as a reporter, producer or multimedia journalist.</p><a href="#/contact" class="btn btn-main magnetic"><span>Get in touch</span></a></div></div>' +
     jobs.map(({ j }, k) => {
     const items = String(j.details || "").split("|").map(x => x.trim()).filter(Boolean);
     const c = col(j.color || (showInfo(j.show) || {}).color, k), start = String(j.dates || "").split(/\s+[–—-]\s+/)[0];
@@ -1919,7 +1924,7 @@ function vType(v){
 }
 const vColor = (v, i) => col(v.color || (showInfo(v.show) || {}).color, i);
 let featured = null, library = [];
-const lib = { tab: "package", show: "All", q: "", page: 0 };
+const lib = { tab: "package", q: "", page: 0 };
 // long tabs split into pages of this many (the rest show everything)
 const PER_PAGE = { produced: 10 };
 // Google-style page buttons: every page when there are few, otherwise first, last and the ones around this page
@@ -1945,7 +1950,7 @@ function renderReel(){
   featured = findFeatured();
   const src = featured ? embedUrl(featured.link) : "", id = featured ? ytId(featured.link) : "";
   const poster = featured && featured.thumb ? imgSrc(featured.thumb) : id ? "https://i.ytimg.com/vi/" + id + "/maxresdefault.jpg" : imgSrc(D.settings.heroPhoto);
-  $("#reelFeature").innerHTML = '<div class="osd"><span>' + (src ? "● READY" : "● STANDBY") + '</span><span class="tc">00:00:00:00</span></div>' +
+  $("#reelFeature").innerHTML = '<div class="osd"><span>' + (src ? "● READY" : "● STANDBY") + '</span></div>' +
     '<button class="reel-poster' + (src ? '' : ' soon') + '" id="reelPlay"' + (src ? ' data-cursor="PLAY"' : '') + ' aria-label="Play ' + esc(featured ? featured.title : "demo reel") + '">' +
     '<img src="' + esc(poster) + '" alt="" decoding="async"><span class="big-play">' + ICON.play + '</span>' +
     '<b>' + esc(featured ? featured.title : "Demo Reel") + '</b><small>' + (src ? "Click to play" : "Coming soon") + '</small></button>';
@@ -1961,29 +1966,18 @@ function renderReel(){
   };
 }
 
-// everything else, sorted into tabs; only Packages can be filtered by show
-const packages = () => library.filter(v => vType(v) === "package");
-function libShows(){
-  const names = [], pk = packages();
-  D.shows.forEach(s => { if (pk.some(v => v.show === s.show)) names.push(s.show); });
-  pk.forEach(v => { if (v.show && !names.includes(v.show)) names.push(v.show); });
-  return names;
-}
+// everything else, sorted into tabs and searchable
 function renderLibrary(){
   const top = findFeatured();
   library = D.videos.filter(v => v !== top && vType(v) !== "reel");
-  const shows = libShows();
-  if (lib.show !== "All" && !shows.includes(lib.show)) lib.show = "All";
+
   // search: every word typed has to appear in the title, show, date or role
   const words = lib.q.toLowerCase().split(/\s+/).filter(Boolean);
   const found = v => { const hay = [v.title, v.show, v.date, v.role].join(" ").toLowerCase(); return words.every(w => hay.includes(w)); };
-  const inShow = v => (lib.show === "All" || vType(v) !== "package" || v.show === lib.show) && found(v);
+  const inShow = found;
   $("#libTabs").innerHTML = TABS.map(([k, label]) =>
     '<button class="tab' + (lib.tab === k ? ' on' : '') + '" role="tab" aria-selected="' + (lib.tab === k) + '" data-tab="' + k + '">' + label +
     '<span class="n">' + library.filter(v => vType(v) === k && inShow(v)).length + '</span></button>').join("");
-  $("#showFilters").innerHTML = lib.tab === "package" && shows.length > 1 ?['All'].concat(shows).map((s, i) =>
-    '<button class="filter c-' + (s === "All" ? "neon" : col((showInfo(s) || {}).color, i)) + (lib.show === s ? ' on' : '') + '" data-show-f="' + esc(s) + '">' +
-    (s === "All" ? "All shows" : (logoFor(s) ? '<img class="flogo" src="' + esc(imgSrc(logoFor(s))) + '" alt="" loading="lazy">' : '<span class="dot"></span>') + esc(s)) + '</button>').join("") : "";
   const label = TABS.find(t => t[0] === lib.tab)[1], all = library.filter(v => vType(v) === lib.tab && inShow(v));
   const per = PER_PAGE[lib.tab] || all.length || 1, pages = Math.max(1, Math.ceil(all.length / per));
   lib.page = Math.max(0, Math.min(lib.page, pages - 1));
@@ -2006,8 +2000,7 @@ function renderLibrary(){
       elsewhere.map(([k, l, n]) => '<button class="mini-link" data-goto="' + k + '">See ' + n + ' in ' + l + ' →</button> ').join("") +
       '<button class="mini-link" data-clear>Clear search →</button></div>';
   } else if (!items.length) {
-    html ='<div class="lib-empty card lib-anim"><b>' + (lib.show === "All" ? label + " coming soon" : "No " + esc(lib.show) + " " + label.toLowerCase() + " yet") + '</b>' +
-      (lib.show === "All" ? "Check back soon." : '<button class="mini-link" data-show-f="All">See all shows →</button>') + '</div>';
+    html = '<div class="lib-empty card lib-anim"><b>' + label + ' coming soon</b>Check back soon.</div>';
   } else if (lib.tab === "produced") {
     // produced episodes: a running list, newest at the top of the sheet
     html = '<div class="episodes">' + items.map((v, i) => open(v, "episode lib-anim c-" + vColor(v, i), i,
@@ -2030,7 +2023,6 @@ function renderLibrary(){
     el.insertAdjacentHTML("afterbegin", '<img src="' + esc(t) + '" alt="" loading="lazy">');
   }));
   $$("#libTabs .tab").forEach(b => b.onclick = () => { lib.tab = b.dataset.tab; lib.page = 0; renderLibrary(); });
-  $$("[data-show-f]").forEach(b => b.onclick = () => setShow(b.dataset.showF));
   $$("#libBody [data-li]").forEach(b => b.onclick = () => openVideo(library[+b.dataset.li]));
   $$("#libBody [data-clear]").forEach(b => b.onclick = () => search(""));
   $$("#libBody [data-goto]").forEach(b => b.onclick = () => { lib.tab = b.dataset.goto; lib.page = 0; renderLibrary(); });
@@ -2050,14 +2042,14 @@ function search(q){
 $("#libSearch").addEventListener("input", e => search(e.target.value));
 $("#libSearch").addEventListener("keydown", e => { if (e.key === "Escape") search(""); });
 $("#libClear").onclick = () => { search(""); $("#libSearch").focus(); };
-// pick a show; if it has nothing in the open tab, jump to a tab where it does
+// show one show's work by searching for its name, on the first tab that has some
 function setShow(name){
-  lib.show = name; lib.page = 0;
-  // a show's work lives under Packages, the only tab with show filters
-  if (name !== "All" && packages().some(v => v.show === name)) lib.tab = "package";
-  renderLibrary();
+  const has = k => library.some(v => vType(v) === k && v.show === name);
+  const t = TABS.find(([k]) => has(k));
+  if (t) lib.tab = t[0];
+  search(name);
 }
-// from Career: open the Reel page's library, filtered to one show
+// from Career: open the Reel page's library at one show's work
 function openShow(name){
   setShow(name);
   if (page !== "reel") location.hash = "#/reel";
@@ -2222,6 +2214,11 @@ async function loadSheet(){
   applySheet(tabs);
   render();
 }
+// roles read as job titles, not past-tense verbs: "Associate Produced & Reported" → "Associate Producer & Reporter"
+const TITLE_WORDS = { produced: "Producer", anchored: "Anchor", reported: "Reporter", directed: "Director", edited: "Editor",
+  hosted: "Host", wrote: "Writer", written: "Writer", shot: "Videographer", filmed: "Videographer", announced: "Announcer",
+  operated: "Operator", engineered: "Engineer", managed: "Manager", designed: "Designer", coordinated: "Coordinator" };
+const asTitle = s => String(s || "").replace(/[A-Za-z]+/g, w => TITLE_WORDS[w.toLowerCase()] || w);
 function applySheet([settings, headlines, career, jobs, videos, photos, shows]){
   if (settings) settings.forEach(r => { const k = SETTING_KEYS.find(x => x.toLowerCase() === r.setting.toLowerCase().replace(/[^a-z0-9]/gi, "")); if (k) D.settings[k] = r.value; });
   if (headlines && headlines.length) D.headlines = headlines.map(r => r.headline);
@@ -2231,7 +2228,7 @@ function applySheet([settings, headlines, career, jobs, videos, photos, shows]){
   if (career && career.length) D.timeline = career.map(r => ({ date: r.date, when: words(r.when), title: r.title, text: r.text, icon: r.icon, color: r.color, burst: r.confetti }));
   if (jobs && jobs.length) D.jobs = jobs.map(r => ({ org: r.org, orgDetails: r.orgdetails, show: r.show, title: r.title, dates: r.dates, summary: r.summary, details: r.details, skills: r.skills, color: r.color, video: r.video, photos: r.photos, logo: r.logo }));
   if (shows && shows.length) D.shows = shows.map(r => ({ show: r.show, logo: r.logo, color: r.color, about: r.about }));
-  if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, type: r.type, date: words(r.date), color: r.color, link: r.link, thumb: r.thumbnail || r.thumb, featured: r.featured, role: r.role || r.myrole || r.involvement }));
+  if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, type: r.type, date: words(r.date), color: r.color, link: r.link, thumb: r.thumbnail || r.thumb, featured: r.featured, role: asTitle(r.role || r.myrole || r.involvement) }));
   if (photos && photos.length) D.photos = photos.map(r => ({ file: r.file, caption: r.caption, tag: r.tag, color: r.color, slideshow: r.slideshow }));
 }
 
