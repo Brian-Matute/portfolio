@@ -8,6 +8,8 @@
 <meta name="theme-color" content="#040A18">
 <link rel="icon" type="image/svg+xml" href="media/icon.svg">
 <link rel="apple-touch-icon" href="media/apple-touch-icon.png">
+<!-- pick the theme before anything is drawn, so a light-mode phone never flashes white first (night is the default) -->
+<script>(function(){var t="dark";try{if(localStorage.getItem("bm-theme")==="light")t="light"}catch(e){}var r=document.documentElement;r.setAttribute("data-theme",t);r.setAttribute("data-mode",t)})()</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -810,6 +812,35 @@ footer b{color:#E6F1FF}
   .split .w > *{transform:none}
   html{scroll-behavior:auto}
 }
+
+/* ============ LIGHT MODE POLISH ============
+   Night mode is the default; light mode is a clean white page: crisp text, soft shadows instead of neon glows,
+   and none of the night-sky specks (they read as dust on white). Photos, the opening screen and the Reel player stay as they are. */
+[data-mode="light"]{
+  --bg:#FFFFFF; --bg2:#F5F8FC; --card:#FFFFFF; --text:#0B1B3A; --muted:#44587C; --line:#E2E9F3; --accent:#0A84CC;
+  --shadow:0 1px 2px rgba(11,27,58,.05),0 8px 24px rgba(11,27,58,.06);
+  --shadow-hover:0 2px 4px rgba(11,27,58,.06),0 16px 36px rgba(11,27,58,.10);
+}
+[data-mode="light"] .bg-fx{background:radial-gradient(800px 600px at 0% 10%,rgba(46,197,255,.07),transparent 70%),radial-gradient(800px 600px at 100% 80%,rgba(255,111,78,.05),transparent 70%)}
+[data-mode="light"] .bg-fx .star-layer,[data-mode="light"] .bg-fx .mote-layer{display:none}
+[data-mode="light"] .horizon{opacity:.25}
+[data-mode="light"] .strand{opacity:.75}
+/* cards: soft corner tint instead of a glowing blob */
+[data-mode="light"] .tl-card::before,[data-mode="light"] .ev-card::before{opacity:.4}
+/* timeline circles: white with a coloured ring, not dark discs with a halo */
+[data-mode="light"] .ev.lit .node{background:#fff;color:color-mix(in srgb,var(--c) 80%,#0B1B3A);
+  box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 12%,transparent),0 8px 20px color-mix(in srgb,var(--c) 22%,transparent)}
+/* the signature card goes white with a blue signature */
+[data-mode="light"] .sign{background:#fff;border-color:var(--line);color:var(--text);box-shadow:var(--shadow)}
+[data-mode="light"] .sign .neon{fill:var(--accent);filter:none}
+[data-mode="light"] .sign small{color:var(--muted)}
+/* the round Class of 2026 badge keeps its navy, minus the glow */
+[data-mode="light"] .ring{box-shadow:0 0 0 1px #2A4F96,0 10px 26px rgba(11,27,58,.22)}
+/* coloured glows on hover and on show logos become plain soft shadows */
+[data-mode="light"] .logo-badge{box-shadow:0 2px 8px rgba(11,27,58,.12)}
+[data-mode="light"] .event > .logo-badge{box-shadow:0 0 0 6px var(--bg),0 6px 18px rgba(11,27,58,.14)}
+[data-mode="light"] .vcard:hover,[data-mode="light"] .show-pill:hover{box-shadow:var(--shadow-hover)}
+[data-mode="light"] .kicker::before{box-shadow:none}
 </style>
 </head>
 <body>
@@ -1231,6 +1262,53 @@ const DEFAULTS = {
     { file: "headshot.jpg", caption: "At the UMTV anchor desk",          tag: "Studio", color: "mint" }
   ]
 };
+// photos kept in the media/gallery folder (written with the full media/gallery/ path). They always show in the Gallery, after any photos from the sheet's Photos tab
+// (they stay out of the opening slideshow). tag = the Gallery filter button the photo sits under.
+// The order here is the order on the page; the first dozen also run along the filmstrip.
+const GALLERY = [
+  { file: "media/gallery/newsbreak-anchor.jpg",     caption: "Anchoring NewsBreak", tag: "On air" },
+  { file: "media/gallery/live-in-robes.jpg",        caption: "Live on the UMTV desk in graduation robes", tag: "On air" },
+  { file: "media/gallery/impact-south-florida.jpg", caption: "Anchoring Impact: South Florida, a UMTV special presentation", tag: "On air" },
+  { file: "media/gallery/live-shot-horse.jpg",      caption: "A live shot with a four-legged guest", tag: "In the field" },
+  { file: "media/gallery/umtv-class-of-2026.jpg",   caption: "UMTV's Class of 2026", tag: "The team" },
+  { file: "media/gallery/newsbreak-ep-team.jpg",    caption: "My NewsBreak team", tag: "The team" },
+  { file: "media/gallery/desk-portrait.jpg",        caption: "At the UMTV anchor desk", tag: "Studio" },
+  { file: "media/gallery/studio-portrait.jpg",      caption: "On the UMTV set", tag: "Studio" },
+  { file: "media/gallery/awards-night.jpg",         caption: "UMTV awards night", tag: "Awards" },
+  { file: "media/gallery/everglades-shoot.jpg",     caption: "Shooting in the Everglades", tag: "In the field" },
+  { file: "media/gallery/pulse-show-one.jpg",       caption: "Pulse's first show of the semester, done", tag: "The team" },
+  { file: "media/gallery/hard-rock-game-day.jpg",   caption: "Game day at Hard Rock Stadium", tag: "Canes" },
+  { file: "media/gallery/desk-portrait-2.jpg",      caption: "Behind the desk before a show", tag: "Studio" },
+  { file: "media/gallery/newsvision-team.jpg",      caption: "The NewsVision team after a show", tag: "The team" },
+  { file: "media/gallery/newsvision-wrap.jpg",      caption: "That's a wrap on NewsVision", tag: "The team" },
+  { file: "media/gallery/newsbreak-team.jpg",       caption: "The NewsBreak crew", tag: "The team" },
+  { file: "media/gallery/target-team.jpg",          caption: "My Target team with local law enforcement", tag: "The team" },
+  { file: "media/gallery/um-acceptance.jpg",        caption: "The day I got into the University of Miami", tag: "Canes" },
+  { file: "media/gallery/um-acceptance-2.jpg",      caption: "Celebrating my UM acceptance", tag: "Canes" },
+  { file: "media/gallery/cfp-fan-fest.jpg",         caption: "At the College Football Playoff fan fest in Miami", tag: "Canes" },
+  { file: "media/gallery/canes-legends.jpg",        caption: "Meeting Hurricanes legends at the playoff fan fest", tag: "Canes" },
+  { file: "media/gallery/road-game.jpg",            caption: "Repping the U on the road", tag: "Canes" },
+  { file: "media/gallery/lou-hedley.jpg",           caption: "An autograph from Lou Hedley at Canes fan day", tag: "Canes" },
+  { file: "media/gallery/fan-day-autograph.jpg",    caption: "Getting autographs at Canes fan day", tag: "Canes" },
+  { file: "media/gallery/commencement-selfie.jpg",  caption: "Commencement, Class of 2026", tag: "Graduation" },
+  { file: "media/gallery/grad-with-ibis.jpg",       caption: "Graduation day with Sebastian the Ibis", tag: "Graduation" },
+  { file: "media/gallery/grad-day-1.jpg",           caption: "Diploma in hand", tag: "Graduation" },
+  { file: "media/gallery/grad-day-2.jpg",           caption: "Celebrating graduation", tag: "Graduation" },
+  { file: "media/gallery/grad-day-3.jpg",           caption: "Graduation day", tag: "Graduation" },
+  { file: "media/gallery/grad-day-4.jpg",           caption: "Proud Hurricane", tag: "Graduation" },
+  { file: "media/gallery/grad-day-5.jpg",           caption: "Two more Canes, done", tag: "Graduation" },
+  { file: "media/gallery/grad-party.jpg",           caption: "Celebrating at the grad party", tag: "Graduation" },
+  { file: "media/gallery/special-guest.jpg",        caption: "With a special guest", tag: "Off the clock" },
+  { file: "media/gallery/comic-con.jpg",            caption: "Comic con with the crew", tag: "Off the clock" },
+  { file: "media/gallery/vader.jpg",                caption: "Meeting Darth Vader", tag: "Off the clock" },
+  { file: "media/gallery/spider-man.jpg",           caption: "Suited up as Spider-Man", tag: "Off the clock" },
+  { file: "media/gallery/mario-kart.jpg",           caption: "Mario Kart with friends", tag: "Off the clock" },
+  { file: "media/gallery/space-mountain.jpg",       caption: "Mid-ride on Space Mountain", tag: "Off the clock" },
+  { file: "media/gallery/cat.jpg",                  caption: "Off duty with the cat", tag: "Off the clock" },
+  { file: "media/gallery/seaperch.jpg",             caption: "Team Thanos at SeaPerch, building an underwater robot", tag: "Way back" }
+].map(p => Object.assign({ color: { "On air": "pink", Studio: "mint", "In the field": "gold", "The team": "neon", Awards: "gold",
+  Graduation: "electric", Canes: "pink", "Off the clock": "purple", "Way back": "mint" }[p.tag], extra: true }, p));
+DEFAULTS.photos = DEFAULTS.photos.concat(GALLERY);
 
 /* ===================================================================== */
 
@@ -1326,9 +1404,10 @@ function applyTheme(t){
   if (t) root.setAttribute("data-theme", t); else root.removeAttribute("data-theme");
   root.setAttribute("data-mode", (t ? t === "dark" : systemDark()) ? "dark" : "light");
 }
+// night mode unless the visitor has picked light with the sun/moon button
 let saved = null;
 try { saved = localStorage.getItem("bm-theme"); } catch (e) {}
-applyTheme(saved);
+applyTheme(saved === "light" ? "light" : "dark");
 $("#themeBtn").onclick = () => {
   const next = root.getAttribute("data-mode") === "dark" ? "light" : "dark";
   applyTheme(next);
@@ -1424,7 +1503,7 @@ function buildSlides(){
   // the main image always comes first. Photos marked "yes" in the Photos tab's Slideshow column follow it;
   // with none marked, the slideshow uses your other photos
   const picked = D.photos.filter(p => yes(p.slideshow)).map(p => p.file);
-  [S.heroPhoto].concat(picked.length ? picked : [S.headshot, S.bioPhoto].concat(D.photos.map(p => p.file))).forEach(f => { const src = imgSrc(f); if (src && !files.includes(src) && files.length < 6) files.push(src); });
+  [S.heroPhoto].concat(picked.length ? picked : [S.headshot, S.bioPhoto].concat(D.photos.filter(p => !p.extra).map(p => p.file))).forEach(f => { const src = imgSrc(f); if (src && !files.includes(src) && files.length < 6) files.push(src); });
   if (slides.length && slides.map(s => s.src).join() === files.join()) return;
   const caption = src => { const p = D.photos.find(x => imgSrc(x.file) === src); return p && p.caption ? p.caption : "On the UMTV set"; };
   slides = files.map(src => ({ src, cap: caption(src) }));
@@ -2065,7 +2144,8 @@ function renderGallery(){
   $("#galleryGrid").innerHTML = P.map((p, i) =>
     '<button class="ph reveal" style="--d:' + (i % 3 * 0.1) + 's" data-i="' + i + '" data-tag="' + esc(p.tag) + '" data-cursor="VIEW"><img src="' + esc(imgSrc(p.file)) + '" alt="' + esc(p.caption) + '" loading="lazy" decoding="async"><figcaption>' + esc(p.caption) + '</figcaption></button>').join("");
   // filmstrip repeats the photos so it loops seamlessly
-  let one = P.map((p, i) => '<figure data-i="' + i + '" data-cursor="VIEW"><img src="' + esc(imgSrc(p.file)) + '" alt="' + esc(p.caption) + '" loading="lazy" decoding="async"></figure>').join(""), strip = one;
+  // (the strip shows the first dozen photos; the grid below has them all)
+  let one = P.slice(0, 12).map((p, i) => '<figure data-i="' + i + '" data-cursor="VIEW"><img src="' + esc(imgSrc(p.file)) + '" alt="' + esc(p.caption) + '" loading="lazy" decoding="async"></figure>').join(""), strip = one;
   while (one && (strip.match(/<figure/g) || []).length < 8) strip += one;
   $("#stripTrack").innerHTML = strip + strip;
   $(".strip").style.display = P.length ? "" : "none";
@@ -2229,7 +2309,10 @@ function applySheet([settings, headlines, career, jobs, videos, photos, shows]){
   if (jobs && jobs.length) D.jobs = jobs.map(r => ({ org: r.org, orgDetails: r.orgdetails, show: r.show, title: r.title, dates: r.dates, summary: r.summary, details: r.details, skills: r.skills, color: r.color, video: r.video, photos: r.photos, logo: r.logo }));
   if (shows && shows.length) D.shows = shows.map(r => ({ show: r.show, logo: r.logo, color: r.color, about: r.about }));
   if (videos && videos.length) D.videos = videos.map(r => ({ title: r.title, show: r.show, type: r.type, date: words(r.date), color: r.color, link: r.link, thumb: r.thumbnail || r.thumb, featured: r.featured, role: asTitle(r.role || r.myrole || r.involvement) }));
-  if (photos && photos.length) D.photos = photos.map(r => ({ file: r.file, caption: r.caption, tag: r.tag, color: r.color, slideshow: r.slideshow }));
+  if (photos && photos.length) {
+    D.photos = photos.map(r => ({ file: r.file, caption: r.caption, tag: r.tag, color: r.color, slideshow: r.slideshow }));
+    D.photos = D.photos.concat(GALLERY.filter(g => !D.photos.some(p => p.file === g.file)));
+  }
 }
 
 $("#yr").textContent = new Date().getFullYear();
