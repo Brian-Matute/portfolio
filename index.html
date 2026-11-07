@@ -541,7 +541,8 @@ a.vcard{display:block;text-decoration:none}
 .event{display:grid;grid-template-columns:150px 72px 1fr;column-gap:22px;align-items:start;margin-bottom:34px}
 .ev-when{grid-column:1;text-align:right;padding-top:12px}
 .ev-when b{display:block;font-family:var(--display);font-weight:700;font-size:30px;line-height:1;text-transform:uppercase;color:color-mix(in srgb,var(--c) 75%,var(--text))}
-.ev-when small{display:block;margin-top:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.ev-when small span{display:inline-block;white-space:nowrap}
+.ev-when small{display:block;margin-top:6px;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 70%,var(--text))}
 .event > .logo-badge{grid-column:2;width:72px;height:72px;border-radius:20px;font-size:22px;z-index:1;box-shadow:0 0 0 6px var(--bg),0 0 30px color-mix(in srgb,var(--c) 45%,transparent)}
 .event > .logo-badge.long{font-size:13px}
 .ev-card{grid-column:3;position:relative;overflow:hidden;padding:22px 26px;border-left:3px solid var(--c);transition:box-shadow .3s,border-color .3s,transform .9s var(--ease),opacity .9s var(--ease)}
@@ -558,7 +559,8 @@ a.vcard{display:block;text-decoration:none}
 @media (max-width:760px){
   .events::before{left:28px}
   .event{grid-template-columns:56px 1fr;column-gap:16px}
-  .event > .logo-badge{grid-row:1 / 3;width:56px;height:56px;border-radius:16px;font-size:17px}
+  /* the logo moves to the narrow left column, beside the date and card instead of on top of them */
+  .event > .logo-badge{grid-column:1;grid-row:1 / 3;width:56px;height:56px;border-radius:16px;font-size:17px}
   .event > .logo-badge.long{font-size:10px}
   .ev-when{grid-column:2;grid-row:1;text-align:left;padding-top:4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
   .ev-when b{font-size:22px}.ev-when small{margin:0}
@@ -1897,7 +1899,6 @@ function ageAt(d){
 function renderTimeline(){
   $("#tlEvents").innerHTML = D.timeline.map((t, i) => {
     const next = /^(up )?next/i.test(t.when || ""), c = col(t.color, i);
-    const yr = next ? "NEXT" : ((String(t.when).match(/\d{4}/g) || [""])[0]);
     const tag = t.icon === "star" && i === 0 ? "Day one" : ageAt(t.date);
     const icon = TL_ICONS[String(t.icon || "").toLowerCase()] || TL_ICONS.star;
     const bits = yes(t.burst) ? '<span class="bits">' + Array.from({ length: 14 }, (_, k) => '<i style="--a:' + (k * 360 / 14) + 'deg;--b:' + BURST[k % BURST.length] + '"></i>').join("") + '</span>' : "";
@@ -1905,7 +1906,8 @@ function renderTimeline(){
       '<div class="tl-card card"><div class="when">' + esc(t.when) + '</div><h3>' + esc(t.title) + '</h3><p>' + esc(t.text) + '</p>' +
       (next ? '<a href="#/contact" class="btn btn-main magnetic"><span>Get in touch</span></a>' : '') + '</div>' +
       '<div class="node i-' + esc(String(t.icon || "star").toLowerCase()) + '"><svg viewBox="0 0 48 48" aria-hidden="true">' + icon + '</svg>' + bits + '</div>' +
-      '<div class="tl-date"><span class="yr">' + esc(yr) + '</span>' + (tag ? '<span class="age">' + esc(tag) + '</span>' : '') + '</div></div>';
+      // beside each moment: just the small age tag (the card already shows the date)
+      '<div class="tl-date">' + (tag ? '<span class="age">' + esc(tag) + '</span>' : '') + '</div></div>';
   }).join("");
   $$("#tlEvents .ev").forEach(ev => lighter.observe(ev));
 }
@@ -1956,11 +1958,13 @@ function renderJobs(){
   $("#jobsWrap").innerHTML =
     jobs.map(({ j }, k) => {
     const items = String(j.details || "").split("|").map(x => x.trim()).filter(Boolean);
-    const c = col(j.color || (showInfo(j.show) || {}).color, k), start = String(j.dates || "").split(/\s+[–—-]\s+/)[0];
+    const c = col(j.color || (showInfo(j.show) || {}).color, k), [from, to] = String(j.dates || "").split(/\s+[–—-]\s+/);
     // "University of Miami Television (UMTV)" → "UMTV"
     const org = (String(j.org || "").match(/\(([^)]+)\)/) || [, j.org])[1];
     return '<div class="event c-' + c + '">' +
-      '<div class="ev-when reveal"><b>' + esc(start) + '</b>' + (start !== j.dates ? '<small>' + esc(j.dates) + '</small>' : '') + '</div>' +
+      // just the dates, in small type (no big start date)
+      // (each date is kept whole, so a narrow column breaks it as "Jan 2026 –" over "May 2026")
+      '<div class="ev-when reveal"><small><span>' + esc(from) + (to ? ' –</span> <span>' + esc(to) : '') + '</span></small></div>' +
       // a role that isn't on a listed show wears its organization's badge instead (Target, UMTV)
       // logos in the media folder win: they always load, Drive links only do when the file is shared publicly
       logoBadge(showInfo(j.show) || j.logo || !org ? j.show : org, c, (showInfo(j.show) || {}).logo || orgLogo(org) || j.logo) +
