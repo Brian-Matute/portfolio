@@ -692,10 +692,17 @@ footer b{color:#E6F1FF}
 .page-hero .ph-bg{position:absolute;inset:-4%;animation:kenburns 22s ease-in-out infinite alternate}
 .page-hero .ph-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--pos,60% 30%);opacity:0;transition:opacity 1.8s ease}
 .page-hero .ph-bg img.on{opacity:1}
-.page-hero .ph-bg img.drop,.slide.drop{top:14%;height:auto;-webkit-mask-image:linear-gradient(180deg,transparent,#000 24%);mask-image:linear-gradient(180deg,transparent,#000 24%)}
-.page-hero .ph-bg img.drop{height:86%}
-.slide.drop{top:9%}
-@media (max-width:560px){.page-hero .ph-bg img.drop{top:20%;height:80%}}
+/* "drop" photos (the headshot) are shown zoomed out: the whole picture, sitting low and to the right,
+   its top and left edges fading into the background */
+.page-hero .ph-bg img.drop,.slide.drop{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%),linear-gradient(180deg,transparent,#000 16%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 22%),linear-gradient(180deg,transparent,#000 16%);mask-composite:intersect}
+.slide.drop{top:14%;left:14%}
+.slide.drop img{object-fit:contain;object-position:100% 100%}
+.page-hero .ph-bg img.drop{top:12%;left:auto;right:4%;width:auto;height:88%;aspect-ratio:921/609;object-fit:cover}
+@media (max-width:760px){
+  .slide.drop{top:9%;left:0;right:0;bottom:auto;height:56%;-webkit-mask-image:linear-gradient(180deg,transparent,#000 14%,#000 78%,transparent);-webkit-mask-composite:source-over;mask-image:linear-gradient(180deg,transparent,#000 14%,#000 78%,transparent);mask-composite:add}
+  .slide.drop img{object-fit:cover;object-position:66% 0%}
+}
+@media (max-width:560px){.page-hero .ph-bg img.drop{top:16%;right:auto;left:0;width:100%;height:84%;aspect-ratio:auto;object-position:64% 0%}}
 /* the bottom few pixels are solid page colour, so the photo's edge never peeks out as a line */
 .page-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,10,24,.95) 0%,rgba(4,10,24,.7) 40%,rgba(4,10,24,.2) 75%,rgba(4,10,24,.1)),linear-gradient(0deg,var(--bg) 0,var(--bg) 4%,rgba(4,10,24,0) 45%)}
 .page-hero .wrap{position:relative;z-index:2;width:100%;padding-top:120px;padding-bottom:50px}
@@ -1262,46 +1269,45 @@ const DEFAULTS = {
 // (they stay out of the opening slideshow). tag = the Gallery filter button the photo sits under.
 // The order here is the order on the page; the first dozen also run along the filmstrip.
 const GALLERY = [
-  { file: "newsbreak-anchor.jpg",     caption: "Anchoring NewsBreak", tag: "On air" },
-  { file: "live-in-robes.jpg",        caption: "Live on the UMTV desk in graduation robes", tag: "On air" },
-  { file: "impact-south-florida.jpg", caption: "Anchoring Impact: South Florida, a UMTV special presentation", tag: "On air" },
-  { file: "live-shot-horse.jpg",      caption: "A live shot with a four-legged guest", tag: "In the field" },
-  { file: "umtv-class-of-2026.jpg",   caption: "UMTV's Class of 2026", tag: "The team" },
-  { file: "newsbreak-ep-team.jpg",    caption: "My NewsBreak team", tag: "The team" },
-  { file: "desk-portrait.jpg",        caption: "At the UMTV anchor desk", tag: "Studio" },
-  { file: "studio-portrait.jpg",      caption: "On the UMTV set", tag: "Studio" },
-  { file: "awards-night.jpg",         caption: "UMTV awards night", tag: "Awards" },
-  { file: "everglades-shoot.jpg",     caption: "Shooting in the Everglades", tag: "In the field" },
-  { file: "pulse-show-one.jpg",       caption: "Pulse's first show of the semester, done", tag: "The team" },
-  { file: "hard-rock-game-day.jpg",   caption: "Game day at Hard Rock Stadium", tag: "Canes" },
-  { file: "desk-portrait-2.jpg",      caption: "Behind the desk before a show", tag: "Studio" },
-  { file: "newsvision-team.jpg",      caption: "The NewsVision team after a show", tag: "The team" },
-  { file: "newsvision-wrap.jpg",      caption: "That's a wrap on NewsVision", tag: "The team" },
-  { file: "newsbreak-team.jpg",       caption: "The NewsBreak crew", tag: "The team" },
-  { file: "target-team.jpg",          caption: "My Target team with local law enforcement", tag: "The team" },
-  { file: "um-acceptance.jpg",        caption: "The day I got into the University of Miami", tag: "Canes" },
-  { file: "um-acceptance-2.jpg",      caption: "Celebrating my UM acceptance", tag: "Canes" },
-  { file: "cfp-fan-fest.jpg",         caption: "At the College Football Playoff fan fest in Miami", tag: "Canes" },
-  { file: "canes-legends.jpg",        caption: "Meeting Hurricanes legends at the playoff fan fest", tag: "Canes" },
-  { file: "road-game.jpg",            caption: "Repping the U on the road", tag: "Canes" },
-  { file: "lou-hedley.jpg",           caption: "An autograph from Lou Hedley at Canes fan day", tag: "Canes" },
-  { file: "fan-day-autograph.jpg",    caption: "Getting autographs at Canes fan day", tag: "Canes" },
-  { file: "commencement-selfie.jpg",  caption: "Commencement, Class of 2026", tag: "Graduation" },
-  { file: "grad-with-ibis.jpg",       caption: "Graduation day with Sebastian the Ibis", tag: "Graduation" },
-  { file: "grad-day-1.jpg",           caption: "Diploma in hand", tag: "Graduation" },
-  { file: "grad-day-2.jpg",           caption: "Celebrating graduation", tag: "Graduation" },
-  { file: "grad-day-3.jpg",           caption: "Graduation day", tag: "Graduation" },
-  { file: "grad-day-4.jpg",           caption: "Proud Hurricane", tag: "Graduation" },
-  { file: "grad-day-5.jpg",           caption: "Two more Canes, done", tag: "Graduation" },
-  { file: "grad-party.jpg",           caption: "Celebrating at the grad party", tag: "Graduation" },
-  { file: "special-guest.jpg",        caption: "With a special guest", tag: "Off the clock" },
-  { file: "comic-con.jpg",            caption: "Comic con with the crew", tag: "Off the clock" },
-  { file: "vader.jpg",                caption: "Meeting Darth Vader", tag: "Off the clock" },
-  { file: "spider-man.jpg",           caption: "Suited up as Spider-Man", tag: "Off the clock" },
-  { file: "mario-kart.jpg",           caption: "Mario Kart with friends", tag: "Off the clock" },
-  { file: "space-mountain.jpg",       caption: "Mid-ride on Space Mountain", tag: "Off the clock" },
-  { file: "cat.jpg",                  caption: "Off duty with the cat", tag: "Off the clock" },
-  { file: "seaperch.jpg",             caption: "Team Thanos at SeaPerch, building an underwater robot", tag: "Way back" }
+  { file: "newsbreak-anchor.jpg",     caption: "Reporting for NewsBreak | 2025", tag: "On air" },
+  { file: "live-in-robes.jpg",        caption: "Live on the UMTV desk in graduation robes | 2026", tag: "On air" },
+  { file: "impact-south-florida.jpg", caption: "On the desk for Impact: South Florida, a UMTV special presentation | 2026", tag: "On air" },
+  { file: "live-shot-horse.jpg",      caption: "Standup for Tomorrow's Rainbow | 2025", tag: "In the field" },
+  { file: "umtv-class-of-2026.jpg",   caption: "UMTV's Class of 2026 | 2026", tag: "The team" },
+  { file: "newsbreak-ep-team.jpg",    caption: "NewsBreak! | 2025", tag: "The team" },
+  { file: "desk-portrait.jpg",        caption: "At the UMTV anchor desk | 2025", tag: "Studio" },
+  { file: "awards-night.jpg",         caption: "UMTV awards night! | 2026", tag: "Awards" },
+  { file: "everglades-shoot.jpg",     caption: "Shooting in the Everglades with Mark Potter! | 2026", tag: "In the field" },
+  { file: "pulse-show-one.jpg",       caption: "Pulse's first show of the semester, done | 2026", tag: "The team" },
+  { file: "special-guest.jpg",        caption: "With Desmond Howard during Calvin Hughes' class at UM! | 2024", tag: "Canes" },
+  { file: "hard-rock-game-day.jpg",   caption: "Game day at Hard Rock Stadium! | 2024", tag: "Canes" },
+  { file: "desk-portrait-2.jpg",      caption: "Behind the desk before a show | 2024", tag: "Studio" },
+  { file: "newsvision-team.jpg",      caption: "My final episode of NewsVision! | 2026", tag: "The team" },
+  { file: "newsvision-wrap.jpg",      caption: "That's a wrap on NewsVision! | 2026", tag: "The team" },
+  { file: "newsbreak-team.jpg",       caption: "After NewsBreak's Special 30-minute episode! | 2026", tag: "The team" },
+  { file: "target-team.jpg",          caption: "My Target team with local law enforcement! | 2024", tag: "The team" },
+  { file: "um-acceptance.jpg",        caption: "The day I got into the University of Miami! | 2022", tag: "Canes" },
+  { file: "um-acceptance-2.jpg",      caption: "Celebrating my UM acceptance! | 2022", tag: "Canes" },
+  { file: "cfp-fan-fest.jpg",         caption: "At the College Football Playoff fan fest in Miami | 2026", tag: "Canes" },
+  { file: "canes-legends.jpg",        caption: "Meeting Hurricanes legends Ed Reed & Reggie Wayne at the playoff fan fest | 2026", tag: "Canes" },
+  { file: "road-game.jpg",            caption: "Repping the U in Tallahassee! | 2023", tag: "Canes" },
+  { file: "lou-hedley.jpg",           caption: "With Lou Hedley at Canes fan day | 2022", tag: "Canes" },
+  { file: "fan-day-autograph.jpg",    caption: "With Tyler Van Dyke at Canes fan day | 2022", tag: "Canes" },
+  { file: "commencement-selfie.jpg",  caption: "Commencement, Class of 2026! | 2026", tag: "Graduation" },
+  { file: "grad-with-ibis.jpg",       caption: "Graduation day with Sebastian the Ibis! | 2026", tag: "Graduation" },
+  { file: "grad-day-1.jpg",           caption: "Diploma in hand! | 2026", tag: "Graduation" },
+  { file: "grad-day-2.jpg",           caption: "Celebrating graduation! | 2026", tag: "Graduation" },
+  { file: "grad-day-3.jpg",           caption: "Graduation day! | 2026", tag: "Graduation" },
+  { file: "grad-day-4.jpg",           caption: "With two other amazing UM alum journalists! | 2026", tag: "Graduation" },
+  { file: "grad-day-5.jpg",           caption: "Two more Canes, done! | 2026", tag: "Graduation" },
+  { file: "grad-party.jpg",           caption: "Celebrating at the grad party! | 2026", tag: "Graduation" },
+  { file: "comic-con.jpg",            caption: "At a collectible convention! | 2025", tag: "Off the clock" },
+  { file: "vader.jpg",                caption: "Meeting Darth Vader! | 2022", tag: "Off the clock" },
+  { file: "spider-man.jpg",           caption: "Suited up as Spider-Man! | 2024", tag: "Off the clock" },
+  { file: "mario-kart.jpg",           caption: "Epic Universe's Mario Kart ride with friends! | 2026", tag: "Off the clock" },
+  { file: "space-mountain.jpg",       caption: "Riding Disney's Space Mountain! | 2025", tag: "Off the clock" },
+  { file: "cat.jpg",                  caption: "With one of my cats! | 2022", tag: "Off the clock" },
+  { file: "seaperch.jpg",             caption: "Me at my middle school water robotics club! | 2018", tag: "Off the clock" }
 ].map(p => Object.assign({ color: { "On air": "pink", Studio: "mint", "In the field": "gold", "The team": "neon", Awards: "gold",
   Graduation: "electric", Canes: "pink", "Off the clock": "purple", "Way back": "mint" }[p.tag], extra: true }, p));
 DEFAULTS.photos = DEFAULTS.photos.concat(GALLERY);
