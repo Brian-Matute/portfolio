@@ -75,7 +75,7 @@ em.serif,.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-
 /* (the background light keeps moving while you scroll: it runs on the graphics chip, and pausing/resuming it
    made the browser restyle the whole page at the start and end of every scroll, which was a stutter of its own) */
 /* LITE MODE: switched on automatically when a device can't keep up. Same design, minus the heavy moving extras */
-.lite .mote-layer,.lite .motes,.lite .beam,.lite .cur-dot,.lite .cur-ring{display:none!important}
+.lite .mote-layer,.lite .motes,.lite .beam{display:none!important}
 .lite .star-layer.tw{animation:none!important}
 .lite .horizon,.lite .page-hero .ph-bg,.lite .ring svg.txt,.lite .hero-name .accent .ch,.lite .logo-mark::after{animation:none!important}
 .lite .neon,.lite .logo-mark .sig,.lite .ring .sig,.lite .sig .spark{filter:none!important}
@@ -111,17 +111,6 @@ em.serif,.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-
 #splash .stage{position:relative;z-index:2;display:grid;place-items:center}
 #splash.gone{display:none}
 
-/* ============ CURSOR ============ */
-.cur-dot,.cur-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:700;border-radius:50%;opacity:0;transition:opacity .3s}
-.cur-dot{width:6px;height:6px;margin:-3px 0 0 -3px;background:var(--neon);box-shadow:0 0 10px var(--neon)}
-.cur-ring{width:38px;height:38px;margin:-19px 0 0 -19px;border:1.5px solid rgba(46,197,255,.7);display:grid;place-items:center;transition:opacity .3s,width .3s var(--ease),height .3s var(--ease),margin .3s var(--ease),background .3s,border-color .3s}
-.cur-ring span{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.14em;color:#03122B;opacity:0;transition:opacity .2s}
-body.has-cursor .cur-dot,body.has-cursor .cur-ring{opacity:1}
-body.has-cursor,body.has-cursor a,body.has-cursor button{cursor:none}
-body.has-cursor input,body.has-cursor textarea{cursor:text}
-.cur-ring.hover{width:64px;height:64px;margin:-32px 0 0 -32px;background:rgba(46,197,255,.12)}
-.cur-ring.label{width:84px;height:84px;margin:-42px 0 0 -42px;background:var(--neon);border-color:var(--neon)}
-.cur-ring.label span{opacity:1}
 
 /* ============ PROGRESS BAR + MENU ============ */
 #progress{position:fixed;top:0;left:0;height:3px;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--neon),var(--electric),var(--purple),var(--pink),var(--gold));z-index:200;box-shadow:0 0 12px var(--neon)}
@@ -697,12 +686,18 @@ footer b{color:#E6F1FF}
 
 /* ============ PAGES ============ */
 .page[hidden]{display:none}
-.page.enter{animation:pageIn .7s var(--ease)}
+/* a plain, quick fade between pages: no sliding or zooming, which left the page soft and showed a line under the banner */
+.page.enter{animation:pageFade .4s ease-out}
 .page-hero{position:relative;min-height:min(62vh,560px);display:flex;align-items:flex-end;overflow:hidden;color:#E6F1FF;background:#040A18}
 .page-hero .ph-bg{position:absolute;inset:-4%;animation:kenburns 22s ease-in-out infinite alternate}
-.page.enter .page-hero .ph-bg img{animation:bannerIn 1.6s var(--ease)}
-.page-hero .ph-bg img{width:100%;height:100%;object-fit:cover;object-position:var(--pos,60% 30%)}
-.page-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,10,24,.95) 0%,rgba(4,10,24,.7) 40%,rgba(4,10,24,.2) 75%,rgba(4,10,24,.1)),linear-gradient(0deg,var(--bg) 0%,rgba(4,10,24,0) 45%)}
+.page-hero .ph-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--pos,60% 30%);opacity:0;transition:opacity 1.8s ease}
+.page-hero .ph-bg img.on{opacity:1}
+.page-hero .ph-bg img.drop,.slide.drop{top:14%;height:auto;-webkit-mask-image:linear-gradient(180deg,transparent,#000 24%);mask-image:linear-gradient(180deg,transparent,#000 24%)}
+.page-hero .ph-bg img.drop{height:86%}
+.slide.drop{top:9%}
+@media (max-width:560px){.page-hero .ph-bg img.drop{top:20%;height:80%}}
+/* the bottom few pixels are solid page colour, so the photo's edge never peeks out as a line */
+.page-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,10,24,.95) 0%,rgba(4,10,24,.7) 40%,rgba(4,10,24,.2) 75%,rgba(4,10,24,.1)),linear-gradient(0deg,var(--bg) 0,var(--bg) 4%,rgba(4,10,24,0) 45%)}
 .page-hero .wrap{position:relative;z-index:2;width:100%;padding-top:120px;padding-bottom:50px}
 .page-hero .sec-title{color:#E6F1FF;margin-bottom:10px}
 .page-hero .sec-sub{color:#C3D2EA;margin-bottom:0}
@@ -779,7 +774,7 @@ footer b{color:#E6F1FF}
 @keyframes horizon{0%,100%{opacity:.55;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.08)}}
 @keyframes beam{0%{opacity:0;transform:translateX(-60%) skewX(-18deg)}15%{opacity:1}100%{opacity:0;transform:translateX(560%) skewX(-18deg)}}
 @keyframes bloom{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
-@keyframes bannerIn{from{opacity:0;transform:scale(1.25)}to{opacity:1;transform:none}}
+@keyframes pageFade{from{opacity:0}to{opacity:1}}
 @keyframes ping{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.7);opacity:0}}
 @keyframes burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0)}100%{opacity:0;transform:rotate(var(--a)) translateY(-78px) rotate(220deg)}}
 @keyframes tlSpin{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(14deg) scale(1.14)}}
@@ -857,7 +852,6 @@ footer b{color:#E6F1FF}
 </svg>
 
 <div class="bg-fx" aria-hidden="true"></div>
-<div class="cur-dot" aria-hidden="true"></div><div class="cur-ring" aria-hidden="true"><span></span></div>
 
 <div id="splash" aria-hidden="true">
   <div class="curtain t"></div><div class="curtain b"></div>
@@ -1268,45 +1262,46 @@ const DEFAULTS = {
 // (they stay out of the opening slideshow). tag = the Gallery filter button the photo sits under.
 // The order here is the order on the page; the first dozen also run along the filmstrip.
 const GALLERY = [
-  { file: "newsbreak-anchor.jpg",     caption: "Reporting for NewsBreak | 2025", tag: "On air" },
-  { file: "live-in-robes.jpg",        caption: "Live on the UMTV desk in graduation robes | 2026", tag: "On air" },
-  { file: "impact-south-florida.jpg", caption: "On the desk for Impact: South Florida, a UMTV special presentation | 2026", tag: "On air" },
-  { file: "live-shot-horse.jpg",      caption: "Standup for Tomorrow's Rainbow | 2025", tag: "In the field" },
-  { file: "umtv-class-of-2026.jpg",   caption: "UMTV's Class of 2026 | 2026", tag: "The team" },
-  { file: "newsbreak-ep-team.jpg",    caption: "NewsBreak! | 2025", tag: "The team" },
-  { file: "desk-portrait.jpg",        caption: "At the UMTV anchor desk | 2025", tag: "Studio" },
-  { file: "awards-night.jpg",         caption: "UMTV awards night! | 2026", tag: "Awards" },
-  { file: "everglades-shoot.jpg",     caption: "Shooting in the Everglades with Mark Potter! | 2026", tag: "In the field" },
-  { file: "pulse-show-one.jpg",       caption: "Pulse's first show of the semester, done | 2026", tag: "The team" },
-  { file: "special-guest.jpg",        caption: "With Desmond Howard during Calvin Hughes' class at UM! | 2024", tag: "Canes" },
-  { file: "hard-rock-game-day.jpg",   caption: "Game day at Hard Rock Stadium! | 2024", tag: "Canes" },
-  { file: "desk-portrait-2.jpg",      caption: "Behind the desk before a show | 2024", tag: "Studio" },
-  { file: "newsvision-team.jpg",      caption: "My final episode of NewsVision! | 2026", tag: "The team" },
-  { file: "newsvision-wrap.jpg",      caption: "That's a wrap on NewsVision! | 2026", tag: "The team" },
-  { file: "newsbreak-team.jpg",       caption: "After NewsBreak's Special 30-minute episode! | 2026", tag: "The team" },
-  { file: "target-team.jpg",          caption: "My Target team with local law enforcement! | 2024", tag: "The team" },
-  { file: "um-acceptance.jpg",        caption: "The day I got into the University of Miami! | 2022", tag: "Canes" },
-  { file: "um-acceptance-2.jpg",      caption: "Celebrating my UM acceptance! | 2022", tag: "Canes" },
-  { file: "cfp-fan-fest.jpg",         caption: "At the College Football Playoff fan fest in Miami | 2026", tag: "Canes" },
-  { file: "canes-legends.jpg",        caption: "Meeting Hurricanes legends Ed Reed & Reggie Wayne at the playoff fan fest | 2026", tag: "Canes" },
-  { file: "road-game.jpg",            caption: "Repping the U in Tallahassee! | 2023", tag: "Canes" },
-  { file: "lou-hedley.jpg",           caption: "With Lou Hedley at Canes fan day | 2022", tag: "Canes" },
-  { file: "fan-day-autograph.jpg",    caption: "With Tyler Van Dyke at Canes fan day | 2022", tag: "Canes" },
-  { file: "commencement-selfie.jpg",  caption: "Commencement, Class of 2026! | 2026", tag: "Graduation" },
-  { file: "grad-with-ibis.jpg",       caption: "Graduation day with Sebastian the Ibis! | 2026", tag: "Graduation" },
-  { file: "grad-day-1.jpg",           caption: "Diploma in hand! | 2026", tag: "Graduation" },
-  { file: "grad-day-2.jpg",           caption: "Celebrating graduation! | 2026", tag: "Graduation" },
-  { file: "grad-day-3.jpg",           caption: "Graduation day! | 2026", tag: "Graduation" },
-  { file: "grad-day-4.jpg",           caption: "With two other amazing UM alum journalists! | 2026", tag: "Graduation" },
-  { file: "grad-day-5.jpg",           caption: "Two more Canes, done! | 2026", tag: "Graduation" },
-  { file: "grad-party.jpg",           caption: "Celebrating at the grad party! | 2026", tag: "Graduation" },
-  { file: "comic-con.jpg",            caption: "At a collectible convention! | 2025", tag: "Off the clock" },
-  { file: "vader.jpg",                caption: "Meeting Darth Vader! | 2022", tag: "Off the clock" },
-  { file: "spider-man.jpg",           caption: "Suited up as Spider-Man! | 2024", tag: "Off the clock" },
-  { file: "mario-kart.jpg",           caption: "Epic Universe's Mario Kart ride with friends! | 2026", tag: "Off the clock" },
-  { file: "space-mountain.jpg",       caption: "Riding Disney's Space Mountain! | 2025", tag: "Off the clock" },
-  { file: "cat.jpg",                  caption: "With one of my cats! | 2022", tag: "Off the clock" },
-  { file: "seaperch.jpg",             caption: "Me at my middle school water robotics club! | 2018", tag: "Off the clock" }
+  { file: "newsbreak-anchor.jpg",     caption: "Anchoring NewsBreak", tag: "On air" },
+  { file: "live-in-robes.jpg",        caption: "Live on the UMTV desk in graduation robes", tag: "On air" },
+  { file: "impact-south-florida.jpg", caption: "Anchoring Impact: South Florida, a UMTV special presentation", tag: "On air" },
+  { file: "live-shot-horse.jpg",      caption: "A live shot with a four-legged guest", tag: "In the field" },
+  { file: "umtv-class-of-2026.jpg",   caption: "UMTV's Class of 2026", tag: "The team" },
+  { file: "newsbreak-ep-team.jpg",    caption: "My NewsBreak team", tag: "The team" },
+  { file: "desk-portrait.jpg",        caption: "At the UMTV anchor desk", tag: "Studio" },
+  { file: "studio-portrait.jpg",      caption: "On the UMTV set", tag: "Studio" },
+  { file: "awards-night.jpg",         caption: "UMTV awards night", tag: "Awards" },
+  { file: "everglades-shoot.jpg",     caption: "Shooting in the Everglades", tag: "In the field" },
+  { file: "pulse-show-one.jpg",       caption: "Pulse's first show of the semester, done", tag: "The team" },
+  { file: "hard-rock-game-day.jpg",   caption: "Game day at Hard Rock Stadium", tag: "Canes" },
+  { file: "desk-portrait-2.jpg",      caption: "Behind the desk before a show", tag: "Studio" },
+  { file: "newsvision-team.jpg",      caption: "The NewsVision team after a show", tag: "The team" },
+  { file: "newsvision-wrap.jpg",      caption: "That's a wrap on NewsVision", tag: "The team" },
+  { file: "newsbreak-team.jpg",       caption: "The NewsBreak crew", tag: "The team" },
+  { file: "target-team.jpg",          caption: "My Target team with local law enforcement", tag: "The team" },
+  { file: "um-acceptance.jpg",        caption: "The day I got into the University of Miami", tag: "Canes" },
+  { file: "um-acceptance-2.jpg",      caption: "Celebrating my UM acceptance", tag: "Canes" },
+  { file: "cfp-fan-fest.jpg",         caption: "At the College Football Playoff fan fest in Miami", tag: "Canes" },
+  { file: "canes-legends.jpg",        caption: "Meeting Hurricanes legends at the playoff fan fest", tag: "Canes" },
+  { file: "road-game.jpg",            caption: "Repping the U on the road", tag: "Canes" },
+  { file: "lou-hedley.jpg",           caption: "An autograph from Lou Hedley at Canes fan day", tag: "Canes" },
+  { file: "fan-day-autograph.jpg",    caption: "Getting autographs at Canes fan day", tag: "Canes" },
+  { file: "commencement-selfie.jpg",  caption: "Commencement, Class of 2026", tag: "Graduation" },
+  { file: "grad-with-ibis.jpg",       caption: "Graduation day with Sebastian the Ibis", tag: "Graduation" },
+  { file: "grad-day-1.jpg",           caption: "Diploma in hand", tag: "Graduation" },
+  { file: "grad-day-2.jpg",           caption: "Celebrating graduation", tag: "Graduation" },
+  { file: "grad-day-3.jpg",           caption: "Graduation day", tag: "Graduation" },
+  { file: "grad-day-4.jpg",           caption: "Proud Hurricane", tag: "Graduation" },
+  { file: "grad-day-5.jpg",           caption: "Two more Canes, done", tag: "Graduation" },
+  { file: "grad-party.jpg",           caption: "Celebrating at the grad party", tag: "Graduation" },
+  { file: "special-guest.jpg",        caption: "With a special guest", tag: "Off the clock" },
+  { file: "comic-con.jpg",            caption: "Comic con with the crew", tag: "Off the clock" },
+  { file: "vader.jpg",                caption: "Meeting Darth Vader", tag: "Off the clock" },
+  { file: "spider-man.jpg",           caption: "Suited up as Spider-Man", tag: "Off the clock" },
+  { file: "mario-kart.jpg",           caption: "Mario Kart with friends", tag: "Off the clock" },
+  { file: "space-mountain.jpg",       caption: "Mid-ride on Space Mountain", tag: "Off the clock" },
+  { file: "cat.jpg",                  caption: "Off duty with the cat", tag: "Off the clock" },
+  { file: "seaperch.jpg",             caption: "Team Thanos at SeaPerch, building an underwater robot", tag: "Way back" }
 ].map(p => Object.assign({ color: { "On air": "pink", Studio: "mint", "In the field": "gold", "The team": "neon", Awards: "gold",
   Graduation: "electric", Canes: "pink", "Off the clock": "purple", "Way back": "mint" }[p.tag], extra: true }, p));
 DEFAULTS.photos = DEFAULTS.photos.concat(GALLERY);
@@ -1494,31 +1489,27 @@ setInterval(() => { if (visible.has("hero")) $("#clock").textContent = "MIAMI " 
 // where each photo's subject sits, so the framing looks right (desktop, then phone)
 // computers show each photo centered (keeps the most in frame); phones aim at the face
 // (a third value moves the photo that far right on computers, for photos with the subject in the middle)
-const FOCUS = { "hero.jpg": ["50% 30%", "77% 12%"], "headshot.jpg": ["50% 40%", "64% 30%", "24%"], "bio.jpg": ["50% 26%", "50% 18%", "26%"] };
+const ROTATION = ["hero.jpg", "bio.jpg", "headshot.jpg"];
+const FOCUS = { "hero.jpg": ["50% 30%", "77% 12%"], "headshot.jpg": ["72% 0%", "64% 0%", "", true], "bio.jpg": ["50% 26%", "50% 18%", "26%"] };
 const ENTRANCES = ["far", "below", "left", "right"];
 let fxN = 0;
 const SLIDE_MS = 7000;
 let slides = [], si = -1, slideTimer = null;
 function buildSlides(){
-  const S = D.settings, files = [];
-  // the main image always comes first. Photos marked "yes" in the Photos tab's Slideshow column follow it;
-  // with none marked, the slideshow uses your other photos
-  const picked = D.photos.filter(p => yes(p.slideshow)).map(p => p.file);
-  [S.heroPhoto].concat(picked.length ? picked : [S.headshot, S.bioPhoto].concat(D.photos.filter(p => !p.extra).map(p => p.file))).forEach(f => { const src = imgSrc(f); if (src && !files.includes(src) && files.length < 6) files.push(src); });
+  const files = [];
+  // the welcome page (and every page's banner) rotates through these three photos, in this order
+  ROTATION.forEach(f => { const src = imgSrc(f); if (src && !files.includes(src)) files.push(src); });
   if (slides.length && slides.map(s => s.src).join() === files.join()) return;
   const caption = src => { const p = D.photos.find(x => imgSrc(x.file) === src); return p && p.caption ? p.caption : "On the UMTV set"; };
   slides = files.map(src => ({ src, cap: caption(src) }));
   $("#heroMedia").innerHTML = slides.map(s => {
     const f = FOCUS[s.src.split("/").pop()] || ["60% 35%", "60% 25%"];
-    return '<div class="slide' + (f[2] ? ' shift' : '') + '" style="--pos:' + f[0] + ';--posm:' + f[1] + (f[2] ? ';--shift:' + f[2] : '') + '"><img src="' + esc(s.src) + '" alt="' + esc(s.cap) + '" decoding="async"></div>';
+    // "drop": a photo with little room above the head sits a bit lower, its top fading into the background
+    return '<div class="slide' + (f[2] ? ' shift' : '') + (f[3] ? ' drop' : '') + '" style="--pos:' + f[0] + ';--posm:' + f[1] + (f[2] ? ';--shift:' + f[2] : '') + '"><img src="' + esc(s.src) + '" alt="' + esc(s.cap) + '" decoding="async"></div>';
   }).join("");
-  // skip a photo that fails to load, or that's too small to look sharp full-screen on this device
+  // skip a photo that fails to load
   $$("#heroMedia img").forEach((img, i) => {
-    const skip = () => { img.closest(".slide").dataset.skip = 1; const d = $$("#slideDots button")[i]; if (d) d.hidden = true; if (i === si) nextSlide(); };
-    img.onerror = skip;
-    // full-screen photos get enlarged a lot (especially on tall phone screens), so small ones would look blurry
-    const check = () => { if (img.naturalWidth < 1400 && slides.length > 1 && i > 0) skip(); };
-    img.complete && img.naturalWidth ? check() : img.addEventListener("load", check);
+    img.onerror = () => { img.closest(".slide").dataset.skip = 1; const d = $$("#slideDots button")[i]; if (d) d.hidden = true; if (i === si) nextSlide(); };
   });
   $("#slideDots").innerHTML = slides.length > 1 ? slides.map((s, i) => '<button aria-label="Show photo ' + (i + 1) + '"><b></b></button>').join("") : "";
   $$("#slideDots button").forEach((b, i) => b.onclick = () => showSlide(i));
@@ -1679,16 +1670,17 @@ const PAGES = [
     blurb: "Email, socials, or send me a message right here.", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>' }
 ];
 // where the face sits in each photo, so wide banners never crop it off
-const PHOTO_FOCUS = { "hero.jpg": "74% 14%", "bio.jpg": "50% 16%", "headshot.jpg": "66% 22%" };
+const PHOTO_FOCUS = { "hero.jpg": "74% 14%", "bio.jpg": "50% 16%", "headshot.jpg": "72% 0%" };
+// photos framed tight at the top: shown a little lower in the banner so the head isn't cut off
+const DROP = ["headshot.jpg"];
 // banner at the top of each page (its section's own heading is replaced by it) + "up next" link at the bottom
 PAGES.forEach((p, i) => {
   const page = $('.page[data-page="' + p.r + '"]'), sec = $("section", page);
   ["kicker", "sec-title", "sec-sub"].forEach(c => { const el = $(":scope > .wrap > ." + c, sec); if (el) el.remove(); });
   const hero = document.createElement("header");
   hero.className = "page-hero c-" + p.color;
-  // every page's banner is the site's main image (a page can still set its own photo)
-  const banner = p.photo || D.settings.heroPhoto;
-  hero.innerHTML = '<div class="ph-bg"><img src="' + imgSrc(banner) + '" alt="" decoding="async" style="--pos:' + (PHOTO_FOCUS[banner] || "60% 30%") + '"></div>' +
+  // every page's banner rotates through the same photos as the welcome page
+  hero.innerHTML = '<div class="ph-bg">' + ROTATION.map((f, k) => '<img' + (DROP.includes(f) ? ' class="drop"' : '') + ' src="' + imgSrc(f) + '" alt="" decoding="async" style="--pos:' + (PHOTO_FOCUS[f] || "60% 30%") + '">').join("") + '</div>' +
     '<div class="wrap"><div class="crumbs"><a href="#/">Home</a><span>/</span><span>' + p.title + '</span></div>' +
     '<span class="kicker">' + p.kicker + '</span><h1 class="sec-title split">' + p.title + '</h1><p class="sec-sub">' + p.sub + '</p></div>';
   page.prepend(hero);
@@ -1717,8 +1709,25 @@ function route(){
     measure(); update();
   }
   if (anchor) anchor.scrollIntoView();
+  bannerShow(true);
 }
 addEventListener("hashchange", route);
+// page banners: open on the photo the welcome page is showing, then crossfade to the next every few seconds
+let bi = 0, bannerTimer = null;
+function bannerShow(fresh){
+  clearTimeout(bannerTimer);
+  const imgs = $$('.page:not([hidden]) .page-hero .ph-bg img');
+  if (!imgs.length) return;
+  if (fresh) {
+    bi = Math.max(0, ROTATION.findIndex(f => slides[si] && slides[si].src === imgSrc(f)));
+    // the first photo appears instantly, with no fade, so the page never opens on an empty banner
+    imgs.forEach((im, k) => { im.style.transition = "none"; im.classList.toggle("on", k === bi); im.getBoundingClientRect(); im.style.transition = ""; });
+  } else {
+    bi = (bi + 1) % imgs.length;
+    imgs.forEach((im, k) => im.classList.toggle("on", k === bi));
+  }
+  bannerTimer = setTimeout(() => bannerShow(false), SLIDE_MS);
+}
 
 // the scrolling word band loops with CSS; it just needs its words twice
 $$(".marquee .track").forEach(t => t.innerHTML += t.innerHTML);
@@ -1763,7 +1772,6 @@ function goLite(){
   if (LITE) return;
   LITE = true;
   root.classList.add("lite");
-  document.body.classList.remove("has-cursor");
   buildLight(); // keeps the stars and a couple of light streams; drops the full-screen rising specks
   try { sessionStorage.setItem("bm-lite", "1"); } catch (e) {}
 }
@@ -1798,25 +1806,6 @@ addEventListener("scroll", () => {
 }, { passive: true });
 
 if (FINE && !REDUCED && !LITE) {
-  document.body.classList.add("has-cursor");
-  const dot = $(".cur-dot"), ring = $(".cur-ring"), label = $(".cur-ring span");
-  let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, moving = false;
-  // the ring trails the dot, and the loop sleeps once it catches up
-  function loop(){
-    rx += (mx - rx) * 0.2; ry += (my - ry) * 0.2;
-    ring.style.transform = "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0)";
-    if (Math.abs(mx - rx) + Math.abs(my - ry) > 0.5) requestAnimationFrame(loop); else moving = false;
-  }
-  addEventListener("pointermove", e => { mx = e.clientX; my = e.clientY; dot.style.transform = "translate3d(" + mx + "px," + my + "px,0)"; if (!moving) { moving = true; requestAnimationFrame(loop); } }, { passive: true });
-  document.addEventListener("pointerover", e => {
-    const lab = e.target.closest("[data-cursor]");
-    const t = e.target.closest("a,button,.ph,input,textarea");
-    ring.classList.toggle("label", !!lab);
-    ring.classList.toggle("hover", !!t && !lab);
-    label.textContent = lab ? lab.dataset.cursor : "";
-  });
-  document.documentElement.addEventListener("mouseleave", () => document.body.classList.remove("has-cursor"));
-  document.documentElement.addEventListener("mouseenter", () => document.body.classList.add("has-cursor"));
   let pulled = null, tilted = null, lastMove = null, moveQueued = false;
   // mice can fire 100+ moves a second; handle at most one per frame
   document.addEventListener("pointermove", e => {
